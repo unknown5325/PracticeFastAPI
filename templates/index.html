@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" id="htm">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <button id="butt">CLICK ME</button>
+    <script>
+        let button = document.getElementById('butt')
+        let htm = document.getElementById('htm')
+
+        button.addEventListener('click', () => {
+            htm.classList.toggle('switch')
+        })
+    </script>
+</body>
+</html>
