@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог товаров</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-logo">⚡ AI.Platform</div>
+        <ul class="nav-links">
+            <li><a href="home">Главная</a></li>
+            <li><a href="catalog" class="active">Каталог</a></li>
+        </ul>
+        <div class="nav-auth">
+            <a href="login" class="btn btn-outline">Войти</a>
+            <a href="register" class="btn btn-primary">Регистрация</a>
+        </div>
+    </nav>
+
+    <main class="container main-content">
+        <h2 style="margin-bottom: 2rem;">Каталог продуктов</h2>
+        
+        <div class="catalog-layout">
+            <!-- Боковая панель фильтров -->
+            <aside class="filters-sidebar">
+                <div class="filter-section">
+                    <h4>Категории</h4>
+                    <div class="filter-options">
+                        <label><input type="checkbox" checked> Нейросети</label>
+                        <label><input type="checkbox"> Разработка</label>
+                        <label><input type="checkbox"> Дизайн</label>
+                    </div>
+                </div>
+                <div class="filter-section">
+                    <h4>Тарифный план</h4>
+                    <div class="filter-options">
+                        <label><input type="radio" name="price" checked> Все</label>
+                        <label><input type="radio" name="price"> Бесплатно</label>
+                        <label><input type="radio" name="price"> Премиум</label>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Сетка карточек -->
+            <section class="products-grid">
+                <!-- Карточка 1 -->
+                <div class="product-card">
+                    <div class="product-img-placeholder">Изображение 1</div>
+                    <div class="product-info">
+                        <h3 class="product-title">Gemini API Integrator</h3>
+                        <p class="product-desc">Готовый модуль для быстрого подключения ИИ-моделей к вашему сайту.</p>
+                        <div class="product-footer">
+                            <span class="product-price">$19</span>
+                            <button class="btn btn-primary">Купить</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Карточка 2 -->
+                <div class="product-card">
+                    <div class="product-img-placeholder">Изображение 2</div>
+                    <div class="product-info">
+                        <h3 class="product-title">Data Vision Studio</h3>
+                        <p class="product-desc">Инструмент визуализации сложных массивов данных и генерации графиков.</p>
+                        <div class="product-footer">
+                            <span class="product-price">Бесплатно</span>
+                            <button class="btn btn-outline">Скачать</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Карточка 3 -->
+                <div class="product-card">
+                    <div class="product-img-placeholder">Изображение 3</div>
+                    <div class="product-info">
+                        <h3 class="product-title">Cyber Security Pack</h3>
+                        <p class="product-desc">Набор скриптов для проверки уязвимостей ваших облачных хранилищ.</p>
+                        <div class="product-footer">
+                            <span class="product-price">$49</span>
+                            <button class="btn btn-primary">Купить</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2026 AI.Platform. Все права защищены.
+    </footer>
+
+</body>
+</html>
