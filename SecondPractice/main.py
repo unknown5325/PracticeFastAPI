@@ -1,13 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
+from classForApp import Functions
 
-
+func = Functions()
 app = FastAPI()
-app.mount('/static', StaticFiles(directory='SecondPractice/static'), name='static')
-templates = Jinja2Templates(directory='SecondPractice/templates')
+app.mount('/static', StaticFiles(directory='static'), name='static')
+templates = Jinja2Templates(directory='templates')
 
 
 @app.get('/home', response_class=HTMLResponse)
@@ -28,7 +29,12 @@ def home(request:Request):
 @app.get('/login', response_class=HTMLResponse)
 def home(request:Request):
     return templates.TemplateResponse(request=request, name='login.html')
-    
+
+@app.post('/register')
+def getLogin(request:Request, name : str = Form(...), email : str = Form(...), password : str = Form(...)):
+    func.writeCharacteristics(name, email, password)
+    return RedirectResponse(url='/', status_code=303)
+
 @app.get('/register', response_class=HTMLResponse)
 def home(request:Request):
     return templates.TemplateResponse(request=request, name='register.html')
