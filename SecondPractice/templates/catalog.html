@@ -4,7 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Каталог товаров</title>
-    <link rel="stylesheet" href="../static/style.css">
+    <!-- Добавлен кэш-бастинг параметров стилей для FastAPI -->
+    <link rel="stylesheet" href="../static/style.css?v=2">
+    <style>
+        /* Дополнительные стили для бэйджа пользователя в шапке */
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: #140e24; /* var(--card-bg) */
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #2e1065; /* var(--border-color) */
+            font-size: 0.9rem;
+            color: #f3e8ff; /* var(--text-main) */
+        }
+
+        .user-avatar {
+            width: 8px;
+            height: 8px;
+            background-color: #8b5cf6; /* var(--accent-color) */
+            border-radius: 50%;
+            box-shadow: 0 0 8px #8b5cf6;
+        }
+
+        .user-email {
+            font-weight: 500;
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
 </head>
 <body>
 
@@ -14,9 +45,15 @@
             <li><a href="home">Главная</a></li>
             <li><a href="catalog" class="active">Каталог</a></li>
         </ul>
+        
+        <!-- Кнопки авторизации заменены на отображение email текущего пользователя -->
         <div class="nav-auth">
-            <a href="login" class="btn btn-outline">Войти</a>
-            <a href="register" class="btn btn-primary">Регистрация</a>
+            <div class="user-badge">
+                <span class="user-avatar"></span>
+                <span class="user-email" id="header-user-email">
+                    {{ email }}
+                </span>
+            </div>
         </div>
     </nav>
 

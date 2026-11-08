@@ -15,7 +15,7 @@ class Functions:
         df = pd.DataFrame({'Name' : name, 'Email' : email, 'Password' : password, 'HashPassword' : hexDig}, index=[0])
         df.to_csv('UserList.csv', index=False,  mode="a", sep=",", header=not os.path.isfile("UserList.csv"))
 
-    def getCollumn():
+    def getCollumn(self):
         df = pd.read_csv('UserList.csv')
         nameCollumn = df['Name']
         emailCollumn = df['Email']

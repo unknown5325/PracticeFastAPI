@@ -25,13 +25,24 @@ def home(request:Request):
 @app.get('/404', response_class=HTMLResponse)
 def home(request:Request):
     return templates.TemplateResponse(request=request, name='404.html')
-    
+
+@app.post('/login')
+def postLogin(request:Request, email: str = Form(...), password: str = Form(...)):
+    digits = func.getCollumn()
+    hexPassword = func.getHexPassword(password)
+    if email in digits[1].values and hexPassword in digits[3].values:
+        return templates.TemplateResponse(request=request, name='catalog.html', context={'email' : email})
+    else:
+        error = 'Неправильный email или пароль'
+        return templates.TemplateResponse(request=request, name='login.html', context={'error' : error})
+
+
 @app.get('/login', response_class=HTMLResponse)
 def home(request:Request):
     return templates.TemplateResponse(request=request, name='login.html')
 
 @app.post('/register')
-def getLogin(request:Request, name : str = Form(...), email : str = Form(...), password : str = Form(...)):
+def postRegister(request:Request, name : str = Form(...), email : str = Form(...), password : str = Form(...)):
     func.writeCharacteristics(name, email, password)
     return RedirectResponse(url='/', status_code=303)
 
