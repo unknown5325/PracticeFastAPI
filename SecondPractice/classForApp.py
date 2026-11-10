@@ -1,6 +1,8 @@
 import pandas as pd
 import hashlib
 import os
+import uuid
+from datetime import datetime
 
 
 class Functions:
@@ -22,3 +24,8 @@ class Functions:
         passwordCollumn = df['Password']
         hexPasswordCollumn = df['HashPassword']
         return nameCollumn, emailCollumn, passwordCollumn, hexPasswordCollumn
+
+    def createSession(acts: dict, ):
+        session_id = str(uuid.uuid4())
+        acts[session_id] = datetime.now()
+        return session_id

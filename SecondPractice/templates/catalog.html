@@ -7,25 +7,91 @@
     <!-- Добавлен кэш-бастинг параметров стилей для FastAPI -->
     <link rel="stylesheet" href="../static/style.css?v=2">
     <style>
-        /* Дополнительные стили для бэйджа пользователя в шапке */
+        /* Базовые фиолетовые переменные и сброс для демонстрации (если style.css не загрузится) */
+        :root {
+            --bg-main: #0b0718;
+            --card-bg: #140e24;
+            --border-color: #2e1065;
+            --accent-color: #8b5cf6;
+            --accent-hover: #a78bfa;
+            --text-main: #f3e8ff;
+            --text-muted: #c084fc;
+            --danger-color: #f43f5e;
+            --danger-hover: #fb7185;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Навигационная панель */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #0f0920;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-logo {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--text-main);
+            text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links a {
+            color: #a78bfa;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text-main);
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        /* Правая часть шапки: Бэйдж + Кнопка Выйти */
+        .nav-auth {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
         .user-badge {
             display: flex;
             align-items: center;
             gap: 10px;
-            background-color: #140e24; /* var(--card-bg) */
+            background-color: var(--card-bg);
             padding: 8px 16px;
             border-radius: 20px;
-            border: 1px solid #2e1065; /* var(--border-color) */
+            border: 1px solid var(--border-color);
             font-size: 0.9rem;
-            color: #f3e8ff; /* var(--text-main) */
+            color: var(--text-main);
         }
 
         .user-avatar {
             width: 8px;
             height: 8px;
-            background-color: #8b5cf6; /* var(--accent-color) */
+            background-color: var(--accent-color);
             border-radius: 50%;
-            box-shadow: 0 0 8px #8b5cf6;
+            box-shadow: 0 0 8px var(--accent-color);
         }
 
         .user-email {
@@ -34,6 +100,183 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+
+        /* Фиолетовая кнопка Выйти */
+        .btn-logout {
+            background-color: rgba(244, 63, 94, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(244, 63, 94, 0.4);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background-color: var(--danger-color);
+            color: #fff;
+            box-shadow: 0 0 12px rgba(244, 63, 94, 0.4);
+        }
+
+        /* Основной контент и сетка */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            flex: 1;
+        }
+
+        .catalog-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+        }
+
+        /* Боковая панель */
+        .filters-sidebar {
+            background-color: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            height: fit-content;
+        }
+
+        .filter-section h4 {
+            color: var(--text-muted);
+            margin-top: 0;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-options label {
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        /* Кастомный фиолетовый акцент для чекбоксов/радио */
+        .filter-options input[type="checkbox"],
+        .filter-options input[type="radio"] {
+            accent-color: var(--accent-color);
+            margin-right: 8px;
+        }
+
+        /* Карточки товаров */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.15);
+            border-color: var(--accent-color);
+        }
+
+        .product-img-placeholder {
+            background: linear-gradient(135deg, #1e113c 0%, #3b185f 100%);
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .product-title {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.2rem;
+        }
+
+        .product-desc {
+            color: #a78bfa;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin: 0 0 1.5rem 0;
+            flex-grow: 1;
+        }
+
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-price {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #e9d5ff;
+        }
+
+        /* Кнопки карточек */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
+        /* Подвал */
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background-color: #0f0920;
+            border-top: 1px solid var(--border-color);
+            color: #7c3aed;
+            font-size: 0.9rem;
+            margin-top: auto;
         }
     </style>
 </head>
@@ -46,7 +289,7 @@
             <li><a href="catalog" class="active">Каталог</a></li>
         </ul>
         
-        <!-- Кнопки авторизации заменены на отображение email текущего пользователя -->
+        <!-- Добавлена кнопка «Выйти» рядом с бэйджем -->
         <div class="nav-auth">
             <div class="user-badge">
                 <span class="user-avatar"></span>
@@ -54,11 +297,12 @@
                     {{ email }}
                 </span>
             </div>
+            <a href="logout"><button class="btn-logout">Выйти</button></a>
         </div>
     </nav>
 
     <main class="container main-content">
-        <h2 style="margin-bottom: 2rem;">Каталог продуктов</h2>
+        <h2 style="margin-bottom: 2rem; text-shadow: 0 0 15px rgba(139, 92, 246, 0.3);">Каталог продуктов</h2>
         
         <div class="catalog-layout">
             <!-- Боковая панель фильтров -->
@@ -85,47 +329,7 @@
             <section class="products-grid">
                 <!-- Карточка 1 -->
                 <div class="product-card">
-                    <div class="product-img-placeholder">Изображение 1</div>
+                    <div class="product-img-placeholder">Gemini Mod</div>
                     <div class="product-info">
                         <h3 class="product-title">Gemini API Integrator</h3>
                         <p class="product-desc">Готовый модуль для быстрого подключения ИИ-моделей к вашему сайту.</p>
-                        <div class="product-footer">
-                            <span class="product-price">$19</span>
-                            <button class="btn btn-primary">Купить</button>
-                        </div>
-                    </div>
-                </div>
-                <!-- Карточка 2 -->
-                <div class="product-card">
-                    <div class="product-img-placeholder">Изображение 2</div>
-                    <div class="product-info">
-                        <h3 class="product-title">Data Vision Studio</h3>
-                        <p class="product-desc">Инструмент визуализации сложных массивов данных и генерации графиков.</p>
-                        <div class="product-footer">
-                            <span class="product-price">Бесплатно</span>
-                            <button class="btn btn-outline">Скачать</button>
-                        </div>
-                    </div>
-                </div>
-                <!-- Карточка 3 -->
-                <div class="product-card">
-                    <div class="product-img-placeholder">Изображение 3</div>
-                    <div class="product-info">
-                        <h3 class="product-title">Cyber Security Pack</h3>
-                        <p class="product-desc">Набор скриптов для проверки уязвимостей ваших облачных хранилищ.</p>
-                        <div class="product-footer">
-                            <span class="product-price">$49</span>
-                            <button class="btn btn-primary">Купить</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </main>
-
-    <footer>
-        &copy; 2026 AI.Platform. Все права защищены.
-    </footer>
-
-</body>
-</html>
