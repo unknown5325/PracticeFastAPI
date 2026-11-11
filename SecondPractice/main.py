@@ -49,6 +49,7 @@ def postLogin(request:Request, email: str = Form(...), password: str = Form(...)
         response = RedirectResponse(url='/catalog', status_code=303)
         response.set_cookie(key='session_id', value=session_id, httponly=True, secure=True, samesite='lax')
         response.set_cookie(key='email', value=email, httponly=True, secure=True, samesite='lax')
+        response.set_cookie(key='time', value=active_sessions[session_id], httponly=True, secure=True, samesite='lax')
         return response
     else:
         error = 'Неправильный email или пароль'
@@ -66,6 +67,7 @@ def postRegister(request:Request, name : str = Form(...), email : str = Form(...
     active_sessions[session_id] = datetime.now()
     response = RedirectResponse(url='/catalog', status_code=303)
     response.set_cookie(key='session_id', value=session_id, httponly=True, secure=True, samesite='lax')
+    response.set_cookie(key='time', value=active_sessions[session_id], httponly=True, secure=True, samesite='lax')
     return response
 
 @app.get('/register', response_class=HTMLResponse)
@@ -75,7 +77,9 @@ def home(request:Request):
 @app.get('/catalog', response_class=HTMLResponse)
 def home(request:Request, email : str = Cookie(default='User')):
     session_id = request.cookies.get('session_id')
-    if session_id in active_sessions.keys():
+    time = request.cookies.get('time')
+    dt_time = datetime.fromisoformat(time)
+    if session_id in active_sessions.keys() and datetime.now() - dt_time < timedelta(seconds=3): # Добавление времени сессии
         return templates.TemplateResponse(request=request, name='catalog.html', context={'email' : email})
     else:
         return templates.TemplateResponse(request=request, name='403err.html')
@@ -88,6 +92,7 @@ def logout(request:Request):
     response = RedirectResponse(url='/login', status_code=303)
     response.delete_cookie(key='session_id')
     response.delete_cookie(key='email')
+    response.delete_cookie(key='time')
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"

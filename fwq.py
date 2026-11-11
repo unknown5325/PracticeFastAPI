@@ -1,4 +1,3 @@
-tup = (0, 1, 2, 3)
+from datetime import datetime
 
-
-print(tup[1])
+print((datetime.now()).timestamp() - float(datetime.now().timestamp()))

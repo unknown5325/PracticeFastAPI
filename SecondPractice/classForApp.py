@@ -2,10 +2,18 @@ import pandas as pd
 import hashlib
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
+from fastapi import FastAPI, Form, Cookie
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.requests import Request
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 
 
 class Functions:
+
+    def __init__(self):
+        self.templates = Jinja2Templates(directory='templates')
 
     def getHexPassword(self, password):
         hex_obj = hashlib.sha256(password.encode('utf-8'))
