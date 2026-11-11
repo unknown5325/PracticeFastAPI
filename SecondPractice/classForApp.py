@@ -33,7 +33,16 @@ class Functions:
         hexPasswordCollumn = df['HashPassword']
         return nameCollumn, emailCollumn, passwordCollumn, hexPasswordCollumn
 
-    def createSession(acts: dict, ):
+    def createSession(self, acts: dict):
         session_id = str(uuid.uuid4())
         acts[session_id] = datetime.now()
         return session_id
+
+    def writeLogs(self, email, session_id, time):
+        df = pd.DataFrame({ 'Email' : email, 'session_id' : session_id, 'time' : time }, index=[0])
+        df.to_csv('sessions.csv', index=False,  mode="a", sep=",", header=not os.path.isfile("sessions.csv"))
+
+    def reWriteLogs(self, session_id):
+        df = pd.read_csv('sessions.csv')
+        df = df[df['session_id'] != session_id]
+        df.to_csv('sessions.csv', index=False)
