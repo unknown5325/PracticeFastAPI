@@ -20,9 +20,9 @@ class Functions:
         hex_dig = hex_obj.hexdigest()
         return hex_dig
 
-    def writeCharacteristics(self, name, email, password):
+    def writeCharacteristics(self, name, email, password, img):
         hexDig = self.getHexPassword(password)
-        df = pd.DataFrame({'Name' : name, 'Email' : email, 'Password' : password, 'HashPassword' : hexDig}, index=[0])
+        df = pd.DataFrame({'Name' : name, 'Email' : email, 'Password' : password, 'HashPassword' : hexDig, 'img' : img}, index=[0])
         df.to_csv('UserList.csv', index=False,  mode="a", sep=",", header=not os.path.isfile("UserList.csv"))
 
     def getCollumn(self):
@@ -31,7 +31,8 @@ class Functions:
         emailCollumn = df['Email']
         passwordCollumn = df['Password']
         hexPasswordCollumn = df['HashPassword']
-        return nameCollumn, emailCollumn, passwordCollumn, hexPasswordCollumn
+        imgCollumn = df['img']
+        return nameCollumn, emailCollumn, passwordCollumn, hexPasswordCollumn, imgCollumn
 
     def createSession(self, acts: dict):
         session_id = str(uuid.uuid4())

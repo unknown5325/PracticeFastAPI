@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Form, Cookie
+from fastapi import FastAPI, Form, Cookie, File, UploadFile
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
@@ -7,14 +7,20 @@ from starlette.middleware.sessions import SessionMiddleware
 from classForApp import Functions
 import uuid
 from datetime import datetime, timedelta
+from pathlib import Path
+import pandas as pd
 
 
 func = Functions()
 app = FastAPI()
 app.mount('/static', StaticFiles(directory='static'), name='static')
+app.mount('/static/avatars', StaticFiles(directory='static/avatars'), name='static/avatars')
 app.add_middleware(SessionMiddleware, secret_key='checkHowItWorks') # добавление midlleware для создания сессий
 templates = Jinja2Templates(directory='templates')
 active_sessions = {}
+
+UPLOAD_DIR = Path("static/avatars")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @app.middleware('http')
@@ -46,15 +52,20 @@ def postLogin(request:Request, email: str = Form(...), password: str = Form(...)
     digits = func.getCollumn()
     hexPassword = func.getHexPassword(password)
     if email in digits[1].values and hexPassword in digits[3].values:
+        df = pd.read_csv('UserList.csv', index_col='Email')
+        user_row = df.loc[f'{email}']
+        logo = user_row['img']
+        name = user_row['Name']
         session_id = str(uuid.uuid4())
         active_sessions[session_id] = datetime.now()
         response = RedirectResponse(url='/catalog', status_code=303)
         response.set_cookie(key='session_id', value=session_id, httponly=True, secure=True, samesite='lax')
         # request.session['session_id'] = session_id
-        response.set_cookie(key='email', value=email, httponly=True, secure=True, samesite='lax')
+        response.set_cookie(key='name', value=name, httponly=True, secure=True, samesite='lax')
         # request.session['email'] = email
         response.set_cookie(key='time', value=active_sessions[session_id], httponly=True, secure=True, samesite='lax')
         # request.session['time'] = active_sessions[session_id] Не работает с типами данных datetime
+        response.set_cookie(key='logo', value=logo, httponly=True, secure=True, samesite='lax')
         func.writeLogs(email, session_id, active_sessions[session_id]) # для создания файла с сессиями
         return response
     else:
@@ -67,15 +78,27 @@ def home(request:Request):
     return templates.TemplateResponse(request=request, name='login.html')
 
 @app.post('/register')
-def postRegister(request:Request, name : str = Form(...), email : str = Form(...), password : str = Form(...)):
-    func.writeCharacteristics(name, email, password)
+async def postRegister(request:Request, name : str = Form(...), email : str = Form(...), password : str = Form(...), img : UploadFile = File(...)):
     session_id = str(uuid.uuid4())
     active_sessions[session_id] = datetime.now()
+
+    file_ext = Path(img.filename).suffix
+    unique_filename = f"{uuid.uuid4()}{file_ext}"
+    file_path = UPLOAD_DIR / unique_filename
+
+    content = await img.read()
+    with open(file_path, "wb") as f:
+        f.write(content)
+
+    func.writeCharacteristics(name, email, password, unique_filename)
     response = RedirectResponse(url='/catalog', status_code=303)
     response.set_cookie(key='session_id', value=session_id, httponly=True, secure=True, samesite='lax')
     # request.session['session_id'] = session_id
     response.set_cookie(key='time', value=active_sessions[session_id], httponly=True, secure=True, samesite='lax')
     # request.session['time'] = active_sessions[session_id] не работают с типами данных datetime
+    response.set_cookie(key='logo', value=unique_filename)
+    # request.session['email'] = email
+    response.set_cookie(key='name', value=name)
     func.writeLogs(email, session_id, active_sessions[session_id]) # для создания файла с сессиями
     return response
 
@@ -84,14 +107,16 @@ def home(request:Request):
     return templates.TemplateResponse(request=request, name='register.html')
     
 @app.get('/catalog', response_class=HTMLResponse)
-def home(request:Request, email : str = Cookie(default='User')):
+def home(request:Request, name : str = Cookie(default='User')):
     try:
         session_id = request.cookies.get('session_id')
         time = request.cookies.get('time')
+        logo = request.cookies.get('logo')
+        name = request.cookies.get('name')
         print(time)
         dt_time = datetime.fromisoformat(time)
         if session_id in active_sessions.keys() and datetime.now() - dt_time < timedelta(minutes=3): # Добавление времени сессии
-            return templates.TemplateResponse(request=request, name='catalog.html', context={'email' : email})
+            return templates.TemplateResponse(request=request, name='catalog.html', context={'name' : name, 'logo' : logo})
         else:
             return templates.TemplateResponse(request=request, name='403err.html')
     except Exception:

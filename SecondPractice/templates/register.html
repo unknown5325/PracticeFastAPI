@@ -17,7 +17,8 @@
             <h2>Регистрация</h2>
             <p class="auth-subtitle">Создайте аккаунт, чтобы получить доступ</p>
             
-            <form action="/register", method="POST">
+            <!-- Добавлен атрибут enctype="multipart/form-data" для передачи файлов -->
+            <form action="/register" method="POST" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="name">Ваше имя</label>
                     <input type="text" id="name" name="name" class="form-control" placeholder="Александр" required>
@@ -30,6 +31,13 @@
                     <label for="password">Пароль</label>
                     <input type="password" id="password" name="password" class="form-control" placeholder="Минимум 8 знаков" required>
                 </div>
+                
+                <!-- Новое поле для загрузки картинки -->
+                <div class="form-group">
+                    <label for="avatar">Фото профиля (необязательно)</label>
+                    <input type="file" id="avatar" name="img" class="form-control" accept="image/*">
+                </div>
+
                 <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
             </form>
 
