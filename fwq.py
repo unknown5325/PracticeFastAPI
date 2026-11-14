@@ -1,3 +1,6 @@
-from datetime import datetime
+import random
 
-print((datetime.now()).timestamp() - float(datetime.now().timestamp()))
+
+roles = ['Наблюдатель', 'Админ', 'Модератор']
+role = random.choice(roles)
+print(role)

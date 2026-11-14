@@ -9,6 +9,7 @@ import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
 import pandas as pd
+import random
 
 
 func = Functions()
@@ -31,13 +32,21 @@ async def dsiableCache(request:Request, call_next):
     response.headers["Expires"] = "0"
     return response
 
-
-@app.get('/home', response_class=HTMLResponse)
 @app.get('/', response_class=HTMLResponse)
+@app.get('/home', response_class=HTMLResponse)
 def home(request:Request):
-    session_id = request.cookies.get('session_id')
-    print(session_id)
-    return templates.TemplateResponse(request=request, name='home.html')
+    try:
+        time = request.cookies.get('time')
+        dt_time = datetime.fromisoformat(time)
+        if datetime.now() - dt_time < timedelta(minutes=3):
+            role = request.cookies.get('role')
+            name = request.cookies.get('name')
+            logo = request.cookies.get('logo')
+            return templates.TemplateResponse(request=request, name='home.html', context={'name' : name, 'role' : role, 'logo' : logo})
+        else:
+            return templates.TemplateResponse(request=request, name='403err.html')
+    except Exception:
+        return templates.TemplateResponse(request=request, name='403err.html')
 
 @app.get('/403', response_class=HTMLResponse)
 def home(request:Request):
@@ -46,6 +55,7 @@ def home(request:Request):
 @app.get('/404', response_class=HTMLResponse)
 def home(request:Request):
     return templates.TemplateResponse(request=request, name='404.html')
+
 
 @app.post('/login')
 def postLogin(request:Request, email: str = Form(...), password: str = Form(...)):
@@ -56,6 +66,7 @@ def postLogin(request:Request, email: str = Form(...), password: str = Form(...)
         user_row = df.loc[f'{email}']
         logo = user_row['img']
         name = user_row['Name']
+        role = user_row['Role']
         session_id = str(uuid.uuid4())
         active_sessions[session_id] = datetime.now()
         response = RedirectResponse(url='/catalog', status_code=303)
@@ -66,6 +77,9 @@ def postLogin(request:Request, email: str = Form(...), password: str = Form(...)
         response.set_cookie(key='time', value=active_sessions[session_id], httponly=True, secure=True, samesite='lax')
         # request.session['time'] = active_sessions[session_id] Не работает с типами данных datetime
         response.set_cookie(key='logo', value=logo, httponly=True, secure=True, samesite='lax')
+        # request.session['logo'] = logo
+        response.set_cookie(key='role', value=role, httponly=True, secure=True, samesite='lax')
+        # request.session['role'] = role
         func.writeLogs(email, session_id, active_sessions[session_id]) # для создания файла с сессиями
         return response
     else:
@@ -90,7 +104,10 @@ async def postRegister(request:Request, name : str = Form(...), email : str = Fo
     with open(file_path, "wb") as f:
         f.write(content)
 
-    func.writeCharacteristics(name, email, password, unique_filename)
+    roles = ['Observer', 'Admin', 'Moderator']
+    role = random.choice(roles)
+
+    func.writeCharacteristics(name, email, password, unique_filename, role)
     response = RedirectResponse(url='/catalog', status_code=303)
     response.set_cookie(key='session_id', value=session_id, httponly=True, secure=True, samesite='lax')
     # request.session['session_id'] = session_id
@@ -99,8 +116,12 @@ async def postRegister(request:Request, name : str = Form(...), email : str = Fo
     response.set_cookie(key='logo', value=unique_filename)
     # request.session['email'] = email
     response.set_cookie(key='name', value=name)
+    # request.session['role'] = role
+    response.set_cookie(key='role', value=role)
     func.writeLogs(email, session_id, active_sessions[session_id]) # для создания файла с сессиями
     return response
+
+
 
 @app.get('/register', response_class=HTMLResponse)
 def home(request:Request):
@@ -113,10 +134,11 @@ def home(request:Request, name : str = Cookie(default='User')):
         time = request.cookies.get('time')
         logo = request.cookies.get('logo')
         name = request.cookies.get('name')
+        role = request.cookies.get('role')
         print(time)
         dt_time = datetime.fromisoformat(time)
         if session_id in active_sessions.keys() and datetime.now() - dt_time < timedelta(minutes=3): # Добавление времени сессии
-            return templates.TemplateResponse(request=request, name='catalog.html', context={'name' : name, 'logo' : logo})
+            return templates.TemplateResponse(request=request, name='catalog.html', context={'name' : name, 'logo' : logo, 'role' : role})
         else:
             return templates.TemplateResponse(request=request, name='403err.html')
     except Exception:

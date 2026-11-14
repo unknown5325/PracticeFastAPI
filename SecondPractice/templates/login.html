@@ -4,7 +4,209 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход в аккаунт</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}?v=3">
+    <!-- Если у вас есть общий style.css, этот блок <style> можно перенести туда -->
+    <style>
+        :root {
+            --bg-main: #0b0718;
+            --card-bg: #140e24;
+            --border-color: #2e1065;
+            --accent-color: #8b5cf6;
+            --accent-hover: #a78bfa;
+            --text-main: #f3e8ff;
+            --text-muted: #c084fc;
+            --danger-color: #f43f5e;
+            --danger-hover: #fb7185;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: var(--bg-main);
+            background-image:
+                radial-gradient(circle at 20% 10%, rgba(139, 92, 246, 0.15), transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(192, 132, 252, 0.1), transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== НАВБАР ===== */
+        .navbar {
+            background: rgba(20, 14, 36, 0.85);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+        }
+
+        .nav-logo a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent-color), var(--accent-hover));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: opacity 0.2s;
+        }
+
+        .nav-logo a:hover {
+            opacity: 0.8;
+        }
+
+        /* ===== ФОРМА ВХОДА ===== */
+        .auth-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .auth-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .auth-card h2 {
+            color: var(--text-main);
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .auth-subtitle {
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 28px;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control::placeholder {
+            color: rgba(192, 132, 252, 0.4);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+        }
+
+        /* Стиль для ошибки, который добавляет ваш JS */
+        .red-border {
+            border-color: var(--danger-color) !important;
+            box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.2) !important;
+        }
+
+        #error {
+            color: var(--danger-color);
+            font-size: 0.85rem;
+            margin-top: 8px;
+            min-height: 1.2em; /* Чтобы форма не прыгала при появлении ошибки */
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+            margin-top: 8px;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 24px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .auth-footer a {
+            color: var(--accent-hover);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .auth-footer a:hover {
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            text-align: center;
+            padding: 24px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            background: rgba(20, 14, 36, 0.5);
+        }
+
+        /* ===== МОБИЛКА ===== */
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 24px 20px;
+            }
+            .auth-card h2 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -17,7 +219,7 @@
             <h2>С возвращением</h2>
             <p class="auth-subtitle">Войдите в систему для продолжения</p>
             
-            <form action="#", method="POST">
+            <form action="#" method="POST">
                 <div class="form-group">
                     <label for="email">Электронная почта</label>
                     <input type="email" id="email" name="email" class="form-control" placeholder="name@example.com" required>
@@ -34,13 +236,16 @@
                 Нет аккаунта? <a href="register">Создать профиль</a>
             </div>
         </div>
+
         <script>
-            let p = document.getElementById('error')
-            let input_email = document.getElementById('email')
-            let input_password = document.getElementById('password')
-            if (p && p.textContent.trim() == 'Неправильный email или пароль') {
-                input_email.classList.add('red-border')
-                input_password.classList.add('red-border')
+            let p = document.getElementById('error');
+            let input_email = document.getElementById('email');
+            let input_password = document.getElementById('password');
+            
+            // Проверяем, есть ли текст ошибки и совпадает ли он с ожидаемым
+            if (p && p.textContent.trim() === 'Неправильный email или пароль') {
+                input_email.classList.add('red-border');
+                input_password.classList.add('red-border');
             }
         </script>
     </main>

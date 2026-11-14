@@ -4,7 +4,155 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Доступ запрещен — 403</title>
-    <link rel="stylesheet" href="../static/style.css">
+    <style>
+        :root {
+            --bg-main: #0b0718;
+            --card-bg: #140e24;
+            --border-color: #2e1065;
+            --accent-color: #8b5cf6;
+            --accent-hover: #a78bfa;
+            --text-main: #f3e8ff;
+            --text-muted: #c084fc;
+            --danger-color: #f43f5e;
+            --danger-hover: #fb7185;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: var(--bg-main);
+            background-image:
+                radial-gradient(circle at 20% 10%, rgba(139, 92, 246, 0.15), transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(192, 132, 252, 0.1), transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: rgba(20, 14, 36, 0.85);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+        }
+
+        .nav-logo a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent-color), var(--accent-hover));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: opacity 0.2s;
+        }
+        .nav-logo a:hover { opacity: 0.8; }
+
+        .error-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .error-code {
+            font-size: 7rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            opacity: 0.3;
+            line-height: 1;
+            margin-bottom: 16px;
+            letter-spacing: -2px;
+        }
+
+        .error-code.danger {
+            color: var(--danger-color);
+            opacity: 1;
+            text-shadow: 0 0 50px rgba(244, 63, 94, 0.5);
+        }
+
+        .error-title {
+            font-size: 2.2rem;
+            color: var(--text-main);
+            margin-bottom: 16px;
+        }
+
+        .error-msg {
+            color: var(--text-muted);
+            max-width: 500px;
+            margin-bottom: 36px;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+            border: 1px solid var(--accent-color);
+        }
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+        .btn-outline:hover {
+            background: var(--card-bg);
+            border-color: var(--accent-color);
+            color: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        footer {
+            text-align: center;
+            padding: 24px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            background: rgba(20, 14, 36, 0.5);
+        }
+
+        @media (max-width: 480px) {
+            .error-code { font-size: 5rem; }
+            .error-title { font-size: 1.6rem; }
+            .btn-group { flex-direction: column; width: 100%; max-width: 300px; }
+            .btn { width: 100%; }
+        }
+    </style>
 </head>
 <body>
 
@@ -16,8 +164,8 @@
         <div class="error-code danger">403</div>
         <h1 class="error-title">Доступ ограничен</h1>
         <p class="error-msg">У вас нет прав для просмотра этой страницы. Возможно, вам необходимо авторизоваться под учетной записью администратора.</p>
-        <div style="display: flex; gap: 1rem;">
-            <a href="home" class="btn btn-primary">На главную</a>
+        <div class="btn-group">
+            <a href="register" class="btn btn-primary">Регистрация</a>
             <a href="login" class="btn btn-outline">Войти</a>
         </div>
     </main>

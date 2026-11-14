@@ -1,3 +1,8 @@
-Name,Email,Password,HashPassword,img
-qwe,qwe@qwe,qweqweqw,a35a128a821ec06fb6ae1e82210fbdd6941ba5e0718912fa8e7a6d61f13375e7,47a1dafe-c5ca-46f0-ae83-122b9b9704e0.jpg
-denis,denis3@example.com,denis123,bd7785cf5566da10712df500aa445051f2b32fc0165fffde3b7a646d5263c5d8,959ee034-b8d7-4114-85b9-2522383624fc.jpg
+Name,Email,Password,HashPassword,img,Role
+bob,bob@gmail.com,bob123,8d059c3640b97180dd2ee453e20d34ab0cb0f2eccbe87d01915a8e578a202b11,afbd1fcb-4502-4535-94c9-9bc450ce38fb.jpg,Admin
+stuart,stuart@gmail.com,stuart123,120bc0c2d4f7a43dbe2a0dbbdb520613a9104aa34eb9daabd08bbbe6d6346c7f,69193036-2545-41a3-bbd3-fd1c16b5d5a8.jpg,Observer
+kevin,kevin@gmail.com,kevin123,83353fc5a8fdb345a327b9cd55d88302fc7daec0026bc432025e0eef6944e7de,b691ca87-dab4-4236-aee7-4d5ba9dbb049.jpg,Admin
+henry,henry@gmail.com,henry123,406ab09a88fa9d3ed39bd3a99f2cf84a449a86ed9fed487af9c37c9a39ec8b25,816ccd36-0d32-43e6-bb08-9c57b9643e41.png,Moderator
+james,james@gmail.com,james123,eba2346346bce6e941a9ff0a0c96e0e9d4282b658bd72ca2bc93d81021de08d0,467ded3e-0fed-4b19-9294-68f8cae32386.jpg,Moderator
+ed,ed@gmail.com,ed123,284845efd4e69354d072077554a93345d2840430dcf2a65bbbf7b33fe5cdcf4c,4a1e00b2-b1bb-4d4f-8ef9-3368910bd4d9.webp,Moderator
+otto,otto@gmail.com,otto123,981c8c7b5f0984852699547e7e90a16646fa33f3aafe5fad6dc0471492e5f88c,42ac79ea-93d9-48cc-8ea2-81f1ab517db6.jpg,Admin

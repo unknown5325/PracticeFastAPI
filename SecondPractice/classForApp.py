@@ -20,9 +20,9 @@ class Functions:
         hex_dig = hex_obj.hexdigest()
         return hex_dig
 
-    def writeCharacteristics(self, name, email, password, img):
+    def writeCharacteristics(self, name, email, password, img, role):
         hexDig = self.getHexPassword(password)
-        df = pd.DataFrame({'Name' : name, 'Email' : email, 'Password' : password, 'HashPassword' : hexDig, 'img' : img}, index=[0])
+        df = pd.DataFrame({'Name' : name, 'Email' : email, 'Password' : password, 'HashPassword' : hexDig, 'img' : img, 'Role' : role}, index=[0])
         df.to_csv('UserList.csv', index=False,  mode="a", sep=",", header=not os.path.isfile("UserList.csv"))
 
     def getCollumn(self):
