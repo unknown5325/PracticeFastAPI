@@ -7,10 +7,15 @@ from starlette.middleware.sessions import SessionMiddleware
 from classForApp import Functions
 import uuid
 from datetime import datetime, timedelta
+from urllib.parse import quote, unquote
 from pathlib import Path
 import pandas as pd
 import random
+import os
+import random
 
+
+ACTIVETIME = timedelta(hours=30)
 
 func = Functions()
 app = FastAPI()
@@ -18,7 +23,10 @@ app.mount('/static', StaticFiles(directory='static'), name='static')
 app.mount('/static/avatars', StaticFiles(directory='static/avatars'), name='static/avatars')
 app.add_middleware(SessionMiddleware, secret_key='checkHowItWorks') # добавление midlleware для создания сессий
 templates = Jinja2Templates(directory='templates')
-active_sessions = {}
+df = pd.read_csv('sessions.csv')
+ses = df['session_id']
+tm = df['time']
+active_sessions = dict(zip(ses, tm))
 
 UPLOAD_DIR = Path("static/avatars")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
@@ -38,7 +46,7 @@ def home(request:Request):
     try:
         time = request.cookies.get('time')
         dt_time = datetime.fromisoformat(time)
-        if datetime.now() - dt_time < timedelta(minutes=3):
+        if datetime.now() - dt_time < ACTIVETIME:
             role = request.cookies.get('role')
             name = request.cookies.get('name')
             logo = request.cookies.get('logo')
@@ -126,9 +134,21 @@ async def postRegister(request:Request, name : str = Form(...), email : str = Fo
 @app.get('/register', response_class=HTMLResponse)
 def home(request:Request):
     return templates.TemplateResponse(request=request, name='register.html')
+
+@app.post('/catalog')
+def getCatalog(request:Request, 
+            header: str = Form(default=''), 
+            news: str = Form(default=''),
+            id: str = Form(default='')):
+    name = request.cookies.get('name')
+    logo = request.cookies.get('logo')
+    response = RedirectResponse(url='/catalog', status_code=303)
+    df = pd.DataFrame({'avatar' : logo, 'name' : name, 'header' : header, 'news' : news, 'id' : id}, index=[0])
+    df.to_csv('NewsList.csv', index=False,  mode="a", sep=",", header=not os.path.isfile("NewsList.csv"))
+    return response
     
 @app.get('/catalog', response_class=HTMLResponse)
-def home(request:Request, name : str = Cookie(default='User')):
+def catalog(request:Request, name : str = Cookie(default='User')):
     try:
         session_id = request.cookies.get('session_id')
         time = request.cookies.get('time')
@@ -137,12 +157,50 @@ def home(request:Request, name : str = Cookie(default='User')):
         role = request.cookies.get('role')
         print(time)
         dt_time = datetime.fromisoformat(time)
-        if session_id in active_sessions.keys() and datetime.now() - dt_time < timedelta(minutes=3): # Добавление времени сессии
+        if session_id in active_sessions.keys() and datetime.now() - dt_time < ACTIVETIME: # Добавление времени сессии
             return templates.TemplateResponse(request=request, name='catalog.html', context={'name' : name, 'logo' : logo, 'role' : role})
         else:
+            del active_sessions[session_id]
             return templates.TemplateResponse(request=request, name='403err.html')
-    except Exception:
+    except Exception as e:
+        print(e)
         return templates.TemplateResponse(request=request, name='403err.html')
+
+
+@app.get('/form', response_class=HTMLResponse)
+def form(request:Request, name: str = Cookie(default='User'), id : str = '', dtype={'id': str}):
+    try:
+            session_id = request.cookies.get('session_id')
+            time = request.cookies.get('time')
+            logo = request.cookies.get('logo')
+            name = request.cookies.get('name')
+            role = request.cookies.get('role')
+
+            df = pd.read_csv('NewsList.csv', index_col='id')
+            user_row = df.loc[id]
+            nameNews = user_row['name']
+            avatarNews = user_row['avatar']
+            headerNews = user_row['header']
+            news = user_row['news']
+
+
+            dt_time = datetime.fromisoformat(time)
+            if session_id in active_sessions.keys() and datetime.now() - dt_time < ACTIVETIME: # Добавление времени сессии
+                return templates.TemplateResponse(request=request, name='form.html', context={'name' : name, 
+                                                                                              'logo' : logo, 
+                                                                                              'role' : role, 
+                                                                                              'header' : headerNews, 
+                                                                                              'nameNews' : nameNews, 
+                                                                                              'avatarNews' : avatarNews,
+                                                                                              'news' : news})
+            else:
+                del active_sessions[session_id]
+                return templates.TemplateResponse(request=request, name='403err.html')
+    except Exception as e:
+            print(e)
+            return templates.TemplateResponse(request=request, name='403err.html')
+
+
 
 @app.get('/logout', response_class=HTMLResponse)
 def logout(request:Request):

@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Пост пользователя | Новостная лента</title>
+<style>
+    /* === ИСХОДНАЯ СТИЛИСТИКА (сохранена полностью) === */
+    :root {
+        --bg-main: #0b0718;
+        --card-bg: #140e24;
+        --border-color: #2e1065;
+        --accent-color: #8b5cf6;
+        --accent-hover: #a78bfa;
+        --text-main: #f3e8ff;
+        --text-muted: #c084fc;
+        --danger-color: #f43f5e;
+        --danger-hover: #fb7185;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        background: var(--bg-main);
+        background-image:
+            radial-gradient(circle at 20% 10%, rgba(139, 92, 246, 0.15), transparent 40%),
+            radial-gradient(circle at 80% 80%, rgba(192, 132, 252, 0.1), transparent 40%);
+        color: var(--text-main);
+        min-height: 100vh;
+        padding-top: 90px;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px 20px 60px;
+    }
+
+    /* ===== ШАПКА ===== */
+    .top-bar {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        background: rgba(20, 14, 36, 0.85);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--border-color);
+        z-index: 100;
+        padding: 12px 24px;
+    }
+
+    .top-bar-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .user-info { display: flex; align-items: center; gap: 14px; min-width: 0; }
+
+    .avatar {
+        width: 48px; height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+        display: flex; align-items: center; justify-content: center;
+        color: white; font-weight: 700; font-size: 1.1rem;
+        flex-shrink: 0; border: 2px solid var(--border-color);
+        box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+        object-fit: cover;
+    }
+
+    .user-text { display: flex; flex-direction: column; min-width: 0; }
+
+    .user-name {
+        color: var(--text-main); font-weight: 600; font-size: 1rem;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .user-role {
+        color: var(--text-muted); font-size: 0.82rem;
+        display: flex; align-items: center; gap: 6px;
+    }
+
+    .user-role::before {
+        content: ""; width: 7px; height: 7px; border-radius: 50%;
+        background: #22c55e; box-shadow: 0 0 8px #22c55e;
+    }
+
+    .nav-buttons { display: flex; gap: 10px; }
+
+    .btn {
+        padding: 10px 18px; border: none; border-radius: 10px;
+        font-size: 0.92rem; font-weight: 600; cursor: pointer;
+        transition: all 0.2s; font-family: inherit;
+        display: inline-flex; align-items: center; gap: 6px;
+        text-decoration: none; white-space: nowrap;
+    }
+
+    .btn-ghost {
+        background: transparent; color: var(--text-main);
+        border: 1px solid var(--border-color);
+    }
+    .btn-ghost:hover {
+        background: var(--card-bg); border-color: var(--accent-color);
+        color: var(--accent-hover);
+    }
+
+    /* ===== НОВЫЕ СТИЛИ ДЛЯ РАЗВЕРНУТОГО ПОСТА ===== */
+    .back-link {
+        display: inline-flex; align-items: center; gap: 8px;
+        color: var(--text-muted); text-decoration: none;
+        font-size: 0.95rem; margin-bottom: 24px;
+        transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+
+    .expanded-post {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 8px 30px rgba(139, 92, 246, 0.1);
+        animation: slideIn 0.4s ease;
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Шапка поста */
+    .post-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+        margin-bottom: 28px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .post-avatar {
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        border: 3px solid var(--accent-color);
+        box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        object-fit: cover;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+        display: flex; align-items: center; justify-content: center;
+        color: white; font-weight: 700; font-size: 1.8rem;
+    }
+
+    .post-author-info { flex: 1; }
+
+    .post-author-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 6px;
+    }
+
+    .post-author-role {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(139, 92, 246, 0.15);
+        color: var(--accent-hover);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        margin-bottom: 10px;
+    }
+
+    /* Стили для кнопки удаления комментария */
+    .comment-delete-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 0 4px;
+        transition: all 0.2s;
+        margin-left: 8px;
+        display: inline-flex;
+        align-items: center;
+    }
+    .comment-delete-btn:hover {
+        color: var(--danger-color);
+        transform: scale(1.15);
+    }
+    
+    .post-author-role::before {
+        content: ""; width: 8px; height: 8px; border-radius: 50%;
+        background: #22c55e; box-shadow: 0 0 8px #22c55e;
+    }
+
+    .post-date {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        display: flex; align-items: center; gap: 6px;
+    }
+
+    /* Тело поста */
+    .post-title {
+        font-size: 2rem;
+        background: linear-gradient(90deg, var(--text-main), var(--accent-hover));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
+        line-height: 1.3;
+    }
+
+    .post-content {
+        color: var(--text-main);
+        font-size: 1.1rem;
+        line-height: 1.8;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .post-content p { margin-bottom: 16px; }
+    
+    /* Декоративный элемент для текста (цитата) */
+    .post-content blockquote {
+        border-left: 4px solid var(--accent-color);
+        background: rgba(139, 92, 246, 0.05);
+        padding: 16px 20px;
+        border-radius: 0 12px 12px 0;
+        margin: 20px 0;
+        color: var(--text-muted);
+        font-style: italic;
+    }
+
+    /* ===== ДЕЙСТВИЯ И КОММЕНТАРИИ ===== */
+    .card-actions {
+        display: flex; gap: 12px; flex-wrap: wrap;
+        margin-top: 32px; padding-top: 20px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .action-btn {
+        background: transparent; border: 1px solid var(--border-color);
+        color: var(--text-muted); padding: 8px 16px; border-radius: 10px;
+        cursor: pointer; display: flex; align-items: center; gap: 8px;
+        font-size: 0.95rem; transition: all 0.2s; font-family: inherit;
+    }
+
+    .action-btn:hover {
+        border-color: var(--accent-color); color: var(--text-main);
+        background: rgba(139, 92, 246, 0.1);
+    }
+
+    .action-btn.active-like {
+        border-color: #22c55e; color: #22c55e;
+        background: rgba(34, 197, 94, 0.1);
+    }
+
+    .action-btn.active-dislike {
+        border-color: var(--danger-color); color: var(--danger-color);
+        background: rgba(244, 63, 94, 0.1);
+    }
+
+    .comments-section {
+        margin-top: 24px; padding-top: 24px;
+        border-top: 1px solid var(--border-color);
+        animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .comments-header {
+        font-size: 1.1rem; font-weight: 600; color: var(--text-main);
+        margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+    }
+
+    .comments-list {
+        max-height: 300px; overflow-y: auto;
+        margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px;
+    }
+
+    .comments-list::-webkit-scrollbar { width: 6px; }
+    .comments-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+    .comment-item {
+        background: var(--bg-main); padding: 14px 16px;
+        border-radius: 12px; border: 1px solid var(--border-color);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .comment-author {
+        font-size: 0.9rem; font-weight: 600; color: var(--accent-hover);
+        margin-bottom: 6px; display: flex; justify-content: space-between;
+    }
+    
+    .comment-time { font-size: 0.75rem; color: var(--text-muted); font-weight: 400; }
+
+    .comment-text {
+        font-size: 0.95rem; color: var(--text-main); line-height: 1.5;
+    }
+
+    .comment-form { display: flex; gap: 10px; }
+
+    .comment-input {
+        flex: 1; background: var(--bg-main); border: 1px solid var(--border-color);
+        border-radius: 10px; padding: 12px 16px; color: var(--text-main);
+        font-size: 0.95rem; font-family: inherit; transition: all 0.2s;
+    }
+
+    .comment-input:focus {
+        outline: none; border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+    }
+
+    .btn-send {
+        background: var(--accent-color); color: white; border: none;
+        border-radius: 10px; width: 44px; cursor: pointer;
+        transition: background 0.2s; display: flex; align-items: center;
+        justify-content: center; font-size: 1.1rem;
+    }
+
+    .btn-send:hover { background: var(--accent-hover); }
+
+    .empty-comments {
+        text-align: center; color: var(--text-muted);
+        padding: 20px; font-size: 0.95rem; font-style: italic;
+    }
+
+    /* ===== АДАПТИВ ===== */
+    @media (max-width: 640px) {
+        body { padding-top: 80px; }
+        .top-bar { padding: 10px 16px; }
+        .avatar { width: 40px; height: 40px; font-size: 1rem; }
+        .user-name { font-size: 0.9rem; }
+        .user-role { font-size: 0.75rem; }
+        .btn { padding: 8px 12px; font-size: 0.85rem; }
+        .container { padding: 16px 14px 40px; }
+        .expanded-post { padding: 20px; border-radius: 16px; }
+        .post-header { flex-direction: column; align-items: center; text-align: center; gap: 14px; }
+        .post-avatar { width: 70px; height: 70px; font-size: 1.6rem; }
+        .post-author-name { font-size: 1.25rem; }
+        .post-title { font-size: 1.4rem; }
+        .post-content { font-size: 1rem; }
+        .card-actions { gap: 8px; }
+        .action-btn { padding: 8px 12px; font-size: 0.85rem; }
+    }
+</style>
+</head>
+<body>
+
+<!-- ===== ШАПКА ===== -->
+<header class="top-bar">
+    <div class="top-bar-inner">
+        <div class="user-info">
+            <img class="avatar" id="avatar" src="/static/avatars/{{ logo }}" alt="">
+            <div class="user-text">
+                <div class="user-name" name="name" id="userName">{{ name }}</div>
+                <div class="user-role" name="role" id="userRole">{{ role }}</div>
+            </div>
+        </div>
+        <nav class="nav-buttons">
+            <a href="catalog" class="btn btn-ghost">← Лента</a>
+            <a href="home" class="btn btn-ghost">Главная</a>
+        </nav>
+    </div>
+</header>
+
+<!-- ===== КОНТЕНТ ===== -->
+<main class="container">
+    <a href="catalog" class="back-link">← Вернуться к ленте</a>
+
+    <article class="expanded-post">
+        <!-- Шапка поста -->
+        <div class="post-header">
+            < <img class="avatar" id="avatar" src="/static/avatars/{{ avatarNews }}" alt="">
+            <div class="post-author-info">
+                <h1 class="post-author-name">{{ nameNews }}</h1>
+                <div class="post-author-role">{{ role }}</div>
+                <div class="post-date">📅 17 ноября 2026, 14:32</div>
+            </div>
+        </div>
+
+        <!-- Тело поста -->
+        <h2 class="post-title">{{ header }}</h2>
+        <div class="post-content">
+            <p>{{ news }}</p>
+        </div>
+
+        <!-- Действия -->
+        <div class="card-actions">
+            <button class="action-btn" id="likeBtn" onclick="toggleLike()">
+                <span>❤️</span> <span id="likeCount">24</span>
+            </button>
+            <button class="action-btn" id="dislikeBtn" onclick="toggleDislike()">
+                <span>👎</span> <span id="dislikeCount">2</span>
+            </button>
+            <button class="action-btn" onclick="toggleComments()">
+                <span>💬</span> Комментарии (<span id="commentsCount">3</span>)
+            </button>
+            <button class="action-btn" onclick="sharePost()">
+                <span>🔗</span> Поделиться
+            </button>
+        </div>
+
+        <!-- Комментарии -->
+        <section class="comments-section" id="commentsSection">
+            <h3 class="comments-header">💬 Комментарии</h3>
+            <div class="comments-list" id="commentsList">
+                <div class="comment-item">
+                    <div class="comment-author">
+                        <span>Дмитрий С.</span>
+                        <span class="comment-time">2 часа назад</span>
+                    </div>
+                    <div class="comment-text">Отличная идея! Тоже попробую с понедельника — заваривать любимый чай и слушать подкаст.</div>
+                </div>
+                <div class="comment-item">
+                    <div class="comment-author">
+                        <span>Анна П.</span>
+                        <span class="comment-time">1 час назад</span>
+                    </div>
+                    <div class="comment-text">Я пошла другим путём — просто перестала ставить будильник на понедельник. Работает 😄</div>
+                </div>
+                <div class="comment-item">
+                    <div class="comment-author">
+                        <span>Игорь В.</span>
+                        <span class="comment-time">40 минут назад</span>
+                    </div>
+                    <div class="comment-text">Согласен на 100%. Планирование вечера в воскресенье — это прям магия какая-то.</div>
+                </div>
+            </div>
+
+            <form class="comment-form" onsubmit="addComment(event)">
+                <input type="text" class="comment-input" id="commentInput" placeholder="Напишите комментарий..." required>
+                <button type="submit" class="btn-send" title="Отправить">➤</button>
+            </form>
+        </section>
+    </article>
+</main>
+
+<script>
+    const POST_ID = 'post_maria_kovaleva_nov17';
+
+    const defaultState = {
+        likes: 24,
+        dislikes: 2,
+        userReaction: null,
+        comments: [
+            { author: 'Дмитрий С.', time: '2 часа назад', text: 'Отличная идея! Тоже попробую с понедельника — заваривать любимый чай и слушать подкаст.' },
+            { author: 'Анна П.', time: '1 час назад', text: 'Я пошла другим путём — просто перестала ставить будильник на понедельник. Работает 😄' },
+            { author: 'Игорь В.', time: '40 минут назад', text: 'Согласен на 100%. Планирование вечера в воскресенье — это прям магия какая-то.' }
+        ]
+    };
+
+    function loadState() {
+        const saved = localStorage.getItem(POST_ID);
+        return saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultState));
+    }
+
+    let state = loadState();
+    const CURRENT_USER = 'Алексей И.'; // Имя текущего пользователя для проверки прав на удаление
+
+    function saveState() {
+        localStorage.setItem(POST_ID, JSON.stringify(state));
+    }
+
+    function applyStateToDOM() {
+        document.getElementById('likeCount').textContent = state.likes;
+        document.getElementById('dislikeCount').textContent = state.dislikes;
+        document.getElementById('commentsCount').textContent = state.comments.length;
+
+        const likeBtn = document.getElementById('likeBtn');
+        const dislikeBtn = document.getElementById('dislikeBtn');
+
+        likeBtn.classList.toggle('active-like', state.userReaction === 'like');
+        dislikeBtn.classList.toggle('active-dislike', state.userReaction === 'dislike');
+
+        renderComments();
+    }
+
+    function renderComments() {
+        const list = document.getElementById('commentsList');
+        list.innerHTML = '';
+
+        if (state.comments.length === 0) {
+            list.innerHTML = '<div class="empty-comments">Пока нет комментариев. Будьте первым!</div>';
+            return;
+        }
+
+        state.comments.forEach((c, index) => {
+            const item = document.createElement('div');
+            item.className = 'comment-item';
+
+            const authorDiv = document.createElement('div');
+            authorDiv.className = 'comment-author';
+
+            // Показываем кнопку удаления только если автор комментария — текущий пользователь
+            const deleteBtn = c.author === CURRENT_USER 
+                ? `<button class="comment-delete-btn" onclick="deleteComment(${index})" title="Удалить комментарий">🗑️</button>` 
+                : '';
+
+            authorDiv.innerHTML = `<span>${c.author}</span><span class="comment-time">${c.time}</span>${deleteBtn}`;
+
+            const textDiv = document.createElement('div');
+            textDiv.className = 'comment-text';
+            textDiv.textContent = c.text;
+
+            item.appendChild(authorDiv);
+            item.appendChild(textDiv);
+            list.appendChild(item);
+        });
+    }
+
+    function toggleLike() {
+        if (state.userReaction === 'like') {
+            state.likes--;
+            state.userReaction = null;
+        } else {
+            if (state.userReaction === 'dislike') state.dislikes--;
+            state.likes++;
+            state.userReaction = 'like';
+        }
+        saveState();
+        applyStateToDOM();
+    }
+
+    function toggleDislike() {
+        if (state.userReaction === 'dislike') {
+            state.dislikes--;
+            state.userReaction = null;
+        } else {
+            if (state.userReaction === 'like') state.likes--;
+            state.dislikes++;
+            state.userReaction = 'dislike';
+        }
+        saveState();
+        applyStateToDOM();
+    }
+
+    function toggleComments() {
+        document.getElementById('commentsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function addComment(e) {
+        e.preventDefault();
+        const input = document.getElementById('commentInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        state.comments.push({
+            author: CURRENT_USER,
+            time: 'только что',
+            text: text
+        });
+
+        saveState();
+        applyStateToDOM();
+        input.value = '';
+
+        const list = document.getElementById('commentsList');
+        setTimeout(() => { list.scrollTop = list.scrollHeight; }, 50);
+    }
+
+    // === НОВАЯ ФУНКЦИЯ УДАЛЕНИЯ ===
+    function deleteComment(index) {
+        if (confirm('Вы уверены, что хотите удалить этот комментарий?')) {
+            state.comments.splice(index, 1); // Удаляем элемент из массива по индексу
+            saveState();                    // Сохраняем обновлённое состояние
+            applyStateToDOM();              // Перерисовываем интерфейс
+        }
+    }
+
+    function sharePost() {
+        const url = window.location.href;
+        if (navigator.share) {
+            navigator.share({ title: document.title, url: url }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Ссылка скопирована в буфер обмена!');
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', applyStateToDOM);
+</script>
+</body>
+</html>

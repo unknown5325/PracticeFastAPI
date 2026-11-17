@@ -373,7 +373,6 @@
     }
 
     .form-row {
-        display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 14px;
     }
@@ -518,6 +517,21 @@
         opacity: 0.5;
     }
 
+    .news-card {
+    display: block;           /* Возвращаем поведение блочного элемента */
+    text-decoration: none;    /* Убираем стандартное подчеркивание ссылки */
+    color: inherit;           /* Наследуем цвет текста от родителя (убираем синий цвет) */
+    position: relative;       /* Нужно, если кнопка .delete-btn позиционируется абсолютно */
+    /* ... ваши остальные стили карточки (отступы, рамки, фон) ... */
+    }
+
+    /* Чтобы при наведении не появлялось подчеркивание, если оно задано глобально для ссылок */
+    .news-card:hover {
+        text-decoration: none;
+        color: inherit;
+    }
+
+
     /* ===== МОБИЛКА ===== */
     @media (max-width: 600px) {
         body { padding-top: 80px; }
@@ -564,24 +578,19 @@
 
     <section class="form-card">
         <h2>Добавить новость</h2>
-        <form id="newsForm">
-            <div class="form-row">
+        <form id="newsForm" action="/catalog" method="POST">
                 <div class="form-group">
                     <label for="title">Заголовок *</label>
-                    <input type="text" id="title" maxlength="100" required placeholder="Например: Открытие нового парка">
+                    <input type="text" id="title" name="header" maxlength="100" required placeholder="Например: Открытие нового парка">
+                    <input type="hidden" id="newsIdInput" name="id">
                 </div>
-                <div class="form-group">
-                    <label for="author">Автор</label>
-                    <input type="text" id="author" maxlength="40" placeholder="Ваше имя">
-                </div>
-            </div>
             <div class="form-group">
                 <label for="category">Категория</label>
-                <input type="text" id="category" maxlength="30" placeholder="Технологии, Спорт, Наука...">
+                <input type="text" id="category" name="category" maxlength="30" placeholder="Технологии, Спорт, Наука...">
             </div>
             <div class="form-group">
                 <label for="text">Текст новости *</label>
-                <textarea id="text" required placeholder="Расскажите подробнее..."></textarea>
+                <textarea id="text" name="news" required placeholder="Расскажите подробнее..."></textarea>
             </div>
             <button type="submit" class="btn btn-primary">Опубликовать</button>
         </form>
@@ -591,71 +600,34 @@
         <h2>Лента новостей</h2>
         <span class="counter" id="counter">0 новостей</span>
     </div>
-
-        <!-- Действия: лайки, дизлайки, комментарии
-    <div class="card-actions">
-        <button class="action-btn like-btn" data-id="item-1">
-            <span class="icon">👍</span> <span class="count">12</span>
-        </button>
-        <button class="action-btn dislike-btn" data-id="item-1">
-            <span class="icon">👎</span> <span class="count">2</span>
-        </button>
-        <button class="action-btn comment-toggle-btn" data-id="item-1">
-            <span class="icon">💬</span> <span class="count">3</span>
-        </button>
-    </div>
-
-
-    <div class="comments-section" id="comments-item-1" style="display: none;">
-        <div class="comments-list">
-
-            <div class="comment-item">
-                <div class="comment-author">Алексей</div>
-                <div class="comment-text">Отличный инструмент, очень помог в работе!</div>
-            </div>
-        </div>
-        <form class="comment-form" data-id="item-1">
-            <input type="text" class="comment-input" placeholder="Написать комментарий..." required autocomplete="off">
-            <button type="submit" class="btn-send">➤</button>
-        </form>
-    </div> -->
-
     <div class="news-list" id="newsList"></div>
 </div>
 
 <script>
-    // ===== Данные пользователя =====
+
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Данные пользователя
+    const userNameEl = document.getElementById('userName');
+    const userRoleEl = document.getElementById('userRole');
+    const avatarEl = document.getElementById('avatar');
+
     const user = {
-        name: document.getElementById('userName')?.textContent.trim(),
-        role: document.getElementById('userRole')?.textContent.trim()
+        name: userNameEl ? userNameEl.textContent.trim() : 'Гость',
+        role: userRoleEl ? userRoleEl.textContent.trim() : 'User'
     };
 
-    function initAvatar() {
-        const avatar = document.getElementById('avatar');
-        const parts = user.name.trim().split(/\s+/);
-        const initials = (parts[0]?.[0] || '') + (parts[1]?.[0] || '');
-        avatar.textContent = initials.toUpperCase() || '??';
-        document.getElementById('userName').textContent = user.name;
-        document.getElementById('userRole').textContent = user.role;
+    if (avatarEl && userNameEl) {
+        const parts = user.name.split(/\s+/);
+        const first = parts[0] ? parts[0][0] : '';
+        const second = parts[1] ? parts[1][0] : '';
+        avatarEl.textContent = (first + second).toUpperCase() || '??';
     }
-    initAvatar();
 
-    // ===== Кнопки шапки =====
-    document.getElementById('homeBtn').addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
-    // document.getElementById('logoutBtn').addEventListener('click', () => {
-    //     if (confirm('Вы действительно хотите выйти?')) {
-    //         alert('Вы вышли из системы');
-    //         // Здесь можно добавить редирект: window.location.href = '/login';
-    //     }
-    // });
-
-    // ===== Новостная лента =====
+    // 2. Элементы страницы
     const form = document.getElementById('newsForm');
     const newsList = document.getElementById('newsList');
     const counter = document.getElementById('counter');
+    const homeBtn = document.getElementById('homeBtn');
 
     const MONTHS = ['января','февраля','марта','апреля','мая','июня',
                     'июля','августа','сентября','октября','ноября','декабря'];
@@ -666,6 +638,7 @@
     }
 
     function escapeHtml(str) {
+        if (!str) return '';
         const div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
@@ -687,11 +660,19 @@
         localStorage.setItem('news', JSON.stringify(news));
     }
 
+    function generateId() {
+        return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    }
+
+    // 3. Отрисовка карточек
     function renderNews() {
         const news = loadNews();
+        if (!newsList) return;
+        
         newsList.innerHTML = '';
-
-        counter.textContent = `${news.length} ${pluralize(news.length, ['новость','новости','новостей'])}`;
+        if (counter) {
+            counter.textContent = `${news.length} ${pluralize(news.length, ['новость','новости','новостей'])}`;
+        }
 
         if (news.length === 0) {
             newsList.innerHTML = `
@@ -704,12 +685,24 @@
 
         news.sort((a, b) => b.date - a.date);
 
-        news.forEach(item => {
-            const card = document.createElement('article');
+        news.forEach((item, index) => {
+            const card = document.createElement('a');
             card.className = 'news-card';
-            if (user.role == 'Admin' || user.role == 'Moderator'){
-                card.innerHTML = `
-                <button class="delete-btn" data-id="${item.id}" title="Удалить">×</button>
+            const newsId = item.id || `legacy-${index}`;
+
+            const params = new URLSearchParams({
+                id: newsId,
+                header: item.title || '',
+                author: item.author || '',
+                category: item.category || '',
+                news: item.text || ''
+            });
+            card.href = item.url || `/form?${params.toString()}`;
+
+            const isStaff = user.role === 'Admin' || user.role === 'Moderator';
+
+            card.innerHTML = `
+                ${isStaff ? `<button type="button" class="delete-btn" data-id="${newsId}" title="Удалить">×</button>` : ''}
                 <h3>${escapeHtml(item.title)}</h3>
                 <div class="news-meta">
                     <span>📅 ${formatDate(item.date)}</span>
@@ -718,135 +711,61 @@
                 </div>
                 <p class="news-text">${escapeHtml(item.text)}</p>
             `;
-            }
-            else{
-                card.innerHTML = `
-                <h3>${escapeHtml(item.title)}</h3>
-                <div class="news-meta">
-                    <span>📅 ${formatDate(item.date)}</span>
-                    ${item.author ? `<span>✍️ ${escapeHtml(item.author)}</span>` : ''}
-                    ${item.category ? `<span class="category-tag">${escapeHtml(item.category)}</span>` : ''}
-                </div>
-                <p class="news-text">${escapeHtml(item.text)}</p>
-            `;
-            }
-            
             newsList.appendChild(card);
         });
-
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', () => deleteNews(btn.dataset.id));
-        });
     }
 
+    // 4. Удаление
     function deleteNews(id) {
         if (!confirm('Удалить эту новость?')) return;
-        const news = loadNews().filter(n => n.id !== id);
+        const news = loadNews().filter((n, index) => String(n.id || `legacy-${index}`) !== String(id));
         saveNews(news);
         renderNews();
     }
 
-    form.addEventListener('submit', e => {
-        e.preventDefault();
-        const news = loadNews();
-        news.push({
-            id: Date.now().toString(),
-            title: document.getElementById('title').value.trim(),
-            author: document.getElementById('author').value.trim(),
-            category: document.getElementById('category').value.trim(),
-            text: document.getElementById('text').value.trim(),
-            date: Date.now()
+    if (homeBtn) {
+        homeBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
-        saveNews(news);
-        form.reset();
-        renderNews();
-        document.getElementById('title').focus();
-    });
+    }
+
+    if (newsList) {
+        newsList.addEventListener('click', e => {
+            const deleteBtn = e.target.closest('.delete-btn');
+            if (deleteBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                deleteNews(deleteBtn.dataset.id);
+            }
+        });
+    }
+
+    // 5. Сохранение при отправке формы
+    if (form) {
+        form.addEventListener('submit', () => {
+            const newId = generateId();
+            document.getElementById('newsIdInput').value = newId;
+            const titleInput = document.getElementById('title');
+            const authorInput = document.getElementById('author');
+            const categoryInput = document.getElementById('category');
+            const textInput = document.getElementById('text');
+
+            const news = loadNews();
+            news.push({
+                id: newId,
+                title: titleInput ? titleInput.value.trim() : '',
+                author: (authorInput && authorInput.value.trim()) ? authorInput.value.trim() : user.name,
+                category: categoryInput ? categoryInput.value.trim() : '',
+                text: textInput ? textInput.value.trim() : '',
+                date: Date.now()
+            });
+            saveNews(news);
+        });
+    }
 
     renderNews();
+});
 
-    document.addEventListener('DOMContentLoaded', () => {
-        
-        // 1. Переключение видимости комментариев
-        document.querySelectorAll('.comment-toggle-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = btn.dataset.id;
-                const commentsSection = document.getElementById(`comments-${id}`);
-                if (commentsSection) {
-                    const isHidden = commentsSection.style.display === 'none';
-                    commentsSection.style.display = isHidden ? 'block' : 'none';
-                }
-            });
-        });
-
-        // 2. Логика лайков и дизлайков (взаимоисключение)
-        document.querySelectorAll('.like-btn, .dislike-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const isLike = this.classList.contains('like-btn');
-                const activeClass = isLike ? 'active-like' : 'active-dislike';
-                const oppositeClass = isLike ? 'active-dislike' : 'active-like';
-                const countSpan = this.querySelector('.count');
-                let count = parseInt(countSpan.textContent);
-
-                if (this.classList.contains(activeClass)) {
-                    // Если уже нажато, отменяем
-                    this.classList.remove(activeClass);
-                    countSpan.textContent = count - 1;
-                } else {
-                    // Если нажата противоположная кнопка, сбрасываем её
-                    const oppositeBtn = this.parentElement.querySelector(isLike ? '.dislike-btn' : '.like-btn');
-                    if (oppositeBtn.classList.contains(oppositeClass)) {
-                        oppositeBtn.classList.remove(oppositeClass);
-                        oppositeBtn.querySelector('.count').textContent = parseInt(oppositeBtn.querySelector('.count').textContent) - 1;
-                    }
-                    // Активируем текущую
-                    this.classList.add(activeClass);
-                    countSpan.textContent = count + 1;
-                }
-                // TODO: Здесь можно добавить fetch-запрос на сервер для сохранения
-            });
-        });
-
-        // 3. Добавление нового комментария
-        document.querySelectorAll('.comment-form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const input = this.querySelector('.comment-input');
-                const text = input.value.trim();
-                if (!text) return;
-
-                const commentsList = this.parentElement.querySelector('.comments-list');
-                
-                // Создаем DOM-элемент комментария
-                const newComment = document.createElement('div');
-                newComment.className = 'comment-item';
-                newComment.innerHTML = `
-                    <div class="comment-author">Вы</div>
-                    <div class="comment-text">${escapeHtml(text)}</div>
-                `;
-                
-                commentsList.appendChild(newComment);
-                commentsList.scrollTop = commentsList.scrollHeight; // Автопрокрутка вниз
-                
-                // Обновляем счетчик комментариев на кнопке
-                const toggleBtn = document.querySelector(`.comment-toggle-btn[data-id="${this.dataset.id}"]`);
-                if (toggleBtn) {
-                    const countSpan = toggleBtn.querySelector('.count');
-                    countSpan.textContent = parseInt(countSpan.textContent) + 1;
-                }
-
-                input.value = ''; // Очистка поля
-                // TODO: Здесь можно добавить fetch-запрос на сервер для сохранения
-            });
-        });
-
-        // Простая защита от XSS при вставке текста
-        function escapeHtml(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
-    });
 
 </script>
 </body>
