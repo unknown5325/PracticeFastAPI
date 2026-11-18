@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Пост пользователя | Новостная лента</title>
+<title>{{ header }} | Новостная лента</title>
 <style>
-    /* === ИСХОДНАЯ СТИЛИСТИКА (сохранена полностью) === */
+    /* === ИСХОДНАЯ СТИЛИСТИКА === */
     :root {
         --bg-main: #0b0718;
         --card-bg: #140e24;
@@ -107,7 +107,7 @@
         color: var(--accent-hover);
     }
 
-    /* ===== НОВЫЕ СТИЛИ ДЛЯ РАЗВЕРНУТОГО ПОСТА ===== */
+    /* ===== ПОСТ ===== */
     .back-link {
         display: inline-flex; align-items: center; gap: 8px;
         color: var(--text-muted); text-decoration: none;
@@ -130,7 +130,6 @@
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Шапка поста */
     .post-header {
         display: flex;
         align-items: flex-start;
@@ -175,24 +174,6 @@
         margin-bottom: 10px;
     }
 
-    /* Стили для кнопки удаления комментария */
-    .comment-delete-btn {
-        background: transparent;
-        border: none;
-        color: var(--text-muted);
-        cursor: pointer;
-        font-size: 1rem;
-        padding: 0 4px;
-        transition: all 0.2s;
-        margin-left: 8px;
-        display: inline-flex;
-        align-items: center;
-    }
-    .comment-delete-btn:hover {
-        color: var(--danger-color);
-        transform: scale(1.15);
-    }
-    
     .post-author-role::before {
         content: ""; width: 8px; height: 8px; border-radius: 50%;
         background: #22c55e; box-shadow: 0 0 8px #22c55e;
@@ -204,7 +185,6 @@
         display: flex; align-items: center; gap: 6px;
     }
 
-    /* Тело поста */
     .post-title {
         font-size: 2rem;
         background: linear-gradient(90deg, var(--text-main), var(--accent-hover));
@@ -225,7 +205,6 @@
 
     .post-content p { margin-bottom: 16px; }
     
-    /* Декоративный элемент для текста (цитата) */
     .post-content blockquote {
         border-left: 4px solid var(--accent-color);
         background: rgba(139, 92, 246, 0.05);
@@ -333,6 +312,23 @@
         padding: 20px; font-size: 0.95rem; font-style: italic;
     }
 
+    .comment-delete-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 0 4px;
+        transition: all 0.2s;
+        margin-left: 8px;
+        display: inline-flex;
+        align-items: center;
+    }
+    .comment-delete-btn:hover {
+        color: var(--danger-color);
+        transform: scale(1.15);
+    }
+
     /* ===== АДАПТИВ ===== */
     @media (max-width: 640px) {
         body { padding-top: 80px; }
@@ -355,35 +351,39 @@
 </head>
 <body>
 
-<!-- ===== ШАПКА ===== -->
+<!-- ===== ШАПКА ПОЛЬЗОВАТЕЛЯ ===== -->
 <header class="top-bar">
     <div class="top-bar-inner">
         <div class="user-info">
-            <img class="avatar" id="avatar" src="/static/avatars/{{ logo }}" alt="">
+            <img class="avatar" src="/static/avatars/{{ logo }}" alt="Аватар">
             <div class="user-text">
-                <div class="user-name" name="name" id="userName">{{ name }}</div>
-                <div class="user-role" name="role" id="userRole">{{ role }}</div>
+                <div class="user-name" id="userName">{{ name }}</div>
+                <div class="user-role" id="userRole">{{ role }}</div>
             </div>
         </div>
         <nav class="nav-buttons">
-            <a href="catalog" class="btn btn-ghost">← Лента</a>
-            <a href="home" class="btn btn-ghost">Главная</a>
+            <!-- Ссылка на каталог (ленту) -->
+            <a href="/catalog" class="btn btn-ghost">← Лента</a>
+            <a href="/" class="btn btn-ghost">Главная</a>
         </nav>
     </div>
 </header>
 
-<!-- ===== КОНТЕНТ ===== -->
+<!-- ===== КОНТЕНТ ПОСТА ===== -->
 <main class="container">
-    <a href="catalog" class="back-link">← Вернуться к ленте</a>
+    <a href="/catalog" class="back-link">← Вернуться к ленте</a>
 
     <article class="expanded-post">
+        <!-- КРИТИЧЕСКИ ВАЖНО: Скрытое поле для передачи ID поста в JavaScript -->
+        <input type="hidden" id="hiddenPostId" value="{{ id }}">
+
         <!-- Шапка поста -->
         <div class="post-header">
-            < <img class="avatar" id="avatar" src="/static/avatars/{{ avatarNews }}" alt="">
+            <img class="post-avatar" src="/static/avatars/{{ avatarNews }}" alt="Аватар автора">
             <div class="post-author-info">
                 <h1 class="post-author-name">{{ nameNews }}</h1>
                 <div class="post-author-role">{{ role }}</div>
-                <div class="post-date">📅 17 ноября 2026, 14:32</div>
+                <div class="post-date">📅 Опубликовано недавно</div>
             </div>
         </div>
 
@@ -396,13 +396,13 @@
         <!-- Действия -->
         <div class="card-actions">
             <button class="action-btn" id="likeBtn" onclick="toggleLike()">
-                <span>❤️</span> <span id="likeCount">24</span>
+                <span>❤️</span> <span id="likeCount">0</span>
             </button>
             <button class="action-btn" id="dislikeBtn" onclick="toggleDislike()">
-                <span>👎</span> <span id="dislikeCount">2</span>
+                <span>👎</span> <span id="dislikeCount">0</span>
             </button>
             <button class="action-btn" onclick="toggleComments()">
-                <span>💬</span> Комментарии (<span id="commentsCount">3</span>)
+                <span>💬</span> Комментарии (<span id="commentsCount">0</span>)
             </button>
             <button class="action-btn" onclick="sharePost()">
                 <span>🔗</span> Поделиться
@@ -412,29 +412,7 @@
         <!-- Комментарии -->
         <section class="comments-section" id="commentsSection">
             <h3 class="comments-header">💬 Комментарии</h3>
-            <div class="comments-list" id="commentsList">
-                <div class="comment-item">
-                    <div class="comment-author">
-                        <span>Дмитрий С.</span>
-                        <span class="comment-time">2 часа назад</span>
-                    </div>
-                    <div class="comment-text">Отличная идея! Тоже попробую с понедельника — заваривать любимый чай и слушать подкаст.</div>
-                </div>
-                <div class="comment-item">
-                    <div class="comment-author">
-                        <span>Анна П.</span>
-                        <span class="comment-time">1 час назад</span>
-                    </div>
-                    <div class="comment-text">Я пошла другим путём — просто перестала ставить будильник на понедельник. Работает 😄</div>
-                </div>
-                <div class="comment-item">
-                    <div class="comment-author">
-                        <span>Игорь В.</span>
-                        <span class="comment-time">40 минут назад</span>
-                    </div>
-                    <div class="comment-text">Согласен на 100%. Планирование вечера в воскресенье — это прям магия какая-то.</div>
-                </div>
-            </div>
+            <div class="comments-list" id="commentsList"></div>
 
             <form class="comment-form" onsubmit="addComment(event)">
                 <input type="text" class="comment-input" id="commentInput" placeholder="Напишите комментарий..." required>
@@ -445,17 +423,29 @@
 </main>
 
 <script>
-    const POST_ID = 'post_maria_kovaleva_nov17';
+    // === 1. ГЕНЕРАЦИЯ УНИКАЛЬНОГО КЛЮЧА ДЛЯ LOCALSTORAGE ===
+    const hiddenInput = document.getElementById('hiddenPostId');
+    let postIdBase;
+    
+    // Проверяем, что поле существует, не пустое и не содержит незамененный шаблон Jinja2
+    if (hiddenInput && hiddenInput.value && hiddenInput.value.trim() !== '' && hiddenInput.value !== '{{ id }}') {
+        postIdBase = hiddenInput.value.trim();
+    } else {
+        // Фоллбэк: если ID по какой-то причине не передан, используем заголовок и автора
+        const title = document.querySelector('.post-title')?.textContent.trim() || 'no_title';
+        const author = document.querySelector('.post-author-name')?.textContent.trim() || 'no_author';
+        postIdBase = title + '_' + author;
+    }
+    
+    // Создаем безопасный ключ (разрешаем буквы, цифры, '_' и '-')
+    const POST_ID = 'post_data_' + postIdBase.replace(/[^a-zA-Z0-9а-яА-ЯёЁ_-]/g, '_');
 
+    // === 2. СОСТОЯНИЕ ПОСТА ===
     const defaultState = {
-        likes: 24,
-        dislikes: 2,
+        likes: 0,
+        dislikes: 0,
         userReaction: null,
-        comments: [
-            { author: 'Дмитрий С.', time: '2 часа назад', text: 'Отличная идея! Тоже попробую с понедельника — заваривать любимый чай и слушать подкаст.' },
-            { author: 'Анна П.', time: '1 час назад', text: 'Я пошла другим путём — просто перестала ставить будильник на понедельник. Работает 😄' },
-            { author: 'Игорь В.', time: '40 минут назад', text: 'Согласен на 100%. Планирование вечера в воскресенье — это прям магия какая-то.' }
-        ]
+        comments: []
     };
 
     function loadState() {
@@ -464,7 +454,7 @@
     }
 
     let state = loadState();
-    const CURRENT_USER = 'Алексей И.'; // Имя текущего пользователя для проверки прав на удаление
+    const CURRENT_USER = document.getElementById('userName')?.textContent.trim() || 'Гость'; 
 
     function saveState() {
         localStorage.setItem(POST_ID, JSON.stringify(state));
@@ -484,9 +474,11 @@
         renderComments();
     }
 
+    // === 3. ОТРИСОВКА КОММЕНТАРИЕВ ===
     function renderComments() {
         const list = document.getElementById('commentsList');
         list.innerHTML = '';
+        const userRole = document.getElementById('userRole')?.textContent.trim() || '';
 
         if (state.comments.length === 0) {
             list.innerHTML = '<div class="empty-comments">Пока нет комментариев. Будьте первым!</div>';
@@ -500,12 +492,22 @@
             const authorDiv = document.createElement('div');
             authorDiv.className = 'comment-author';
 
-            // Показываем кнопку удаления только если автор комментария — текущий пользователь
-            const deleteBtn = c.author === CURRENT_USER 
-                ? `<button class="comment-delete-btn" onclick="deleteComment(${index})" title="Удалить комментарий">🗑️</button>` 
-                : '';
-
-            authorDiv.innerHTML = `<span>${c.author}</span><span class="comment-time">${c.time}</span>${deleteBtn}`;
+            // Кнопка удаления видна автору комментария или Админу/Модератору
+            const isAuthor = c.author === CURRENT_USER;
+            const isAdminOrMod = userRole === 'Admin' || userRole === 'Moderator';
+            
+            if (isAuthor || isAdminOrMod) {
+                authorDiv.innerHTML = `
+                    <span>${c.author}</span>
+                    <span class="comment-time">${c.time}</span>
+                    <button class="comment-delete-btn" onclick="deleteComment(${index})" title="Удалить комментарий">🗑️</button>
+                `;
+            } else {
+                authorDiv.innerHTML = `
+                    <span>${c.author}</span>
+                    <span class="comment-time">${c.time}</span>
+                `;
+            }
 
             const textDiv = document.createElement('div');
             textDiv.className = 'comment-text';
@@ -517,6 +519,7 @@
         });
     }
 
+    // === 4. ОБРАБОТЧИКИ ДЕЙСТВИЙ ===
     function toggleLike() {
         if (state.userReaction === 'like') {
             state.likes--;
@@ -553,9 +556,12 @@
         const text = input.value.trim();
         if (!text) return;
 
+        const now = new Date();
+        const currentTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
         state.comments.push({
             author: CURRENT_USER,
-            time: 'только что',
+            time: currentTime,
             text: text
         });
 
@@ -567,12 +573,11 @@
         setTimeout(() => { list.scrollTop = list.scrollHeight; }, 50);
     }
 
-    // === НОВАЯ ФУНКЦИЯ УДАЛЕНИЯ ===
     function deleteComment(index) {
         if (confirm('Вы уверены, что хотите удалить этот комментарий?')) {
-            state.comments.splice(index, 1); // Удаляем элемент из массива по индексу
-            saveState();                    // Сохраняем обновлённое состояние
-            applyStateToDOM();              // Перерисовываем интерфейс
+            state.comments.splice(index, 1);
+            saveState();
+            applyStateToDOM();
         }
     }
 
@@ -583,10 +588,13 @@
         } else {
             navigator.clipboard.writeText(url).then(() => {
                 alert('Ссылка скопирована в буфер обмена!');
+            }).catch(() => {
+                alert('Не удалось скопировать ссылку.');
             });
         }
     }
 
+    // Запуск при загрузке страницы
     document.addEventListener('DOMContentLoaded', applyStateToDOM);
 </script>
 </body>

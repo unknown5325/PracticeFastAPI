@@ -176,7 +176,7 @@ def form(request:Request, name: str = Cookie(default='User'), id : str = '', dty
             name = request.cookies.get('name')
             role = request.cookies.get('role')
 
-            df = pd.read_csv('NewsList.csv', index_col='id')
+            df = pd.read_csv('NewsList.csv', index_col='id', dtype=str)
             user_row = df.loc[id]
             nameNews = user_row['name']
             avatarNews = user_row['avatar']
@@ -192,14 +192,15 @@ def form(request:Request, name: str = Cookie(default='User'), id : str = '', dty
                                                                                               'header' : headerNews, 
                                                                                               'nameNews' : nameNews, 
                                                                                               'avatarNews' : avatarNews,
-                                                                                              'news' : news})
+                                                                                              'news' : news,
+                                                                                              'id' : id})
             else:
+                print('bad')
                 del active_sessions[session_id]
                 return templates.TemplateResponse(request=request, name='403err.html')
     except Exception as e:
             print(e)
             return templates.TemplateResponse(request=request, name='403err.html')
-
 
 
 @app.get('/logout', response_class=HTMLResponse)

@@ -546,6 +546,51 @@
         .page-header h1 { font-size: 1.6rem; }
         .container { padding: 20px 12px 30px; }
     }
+
+
+    .news-text-wrapper {
+        position: relative;
+    }
+
+    .news-text {
+        word-break: break-word; /* Переносит длинные слова без пробелов */
+        margin-bottom: 0;
+    }
+
+    .news-text.truncated {
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Плавное затемнение нижней части текста */
+    .news-text.truncated::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 18px;
+        /* Подставьте точный цвет фона вашей карточки вместо #151b2b */
+        background: linear-gradient(to bottom, rgba(21, 27, 43, 0), #151b2b 95%);
+        pointer-events: none;
+    }
+
+    /* Кнопка «Ещё» */
+    .read-more-btn {
+        display: inline-block;
+        margin-top: 6px;
+        color: #5b8def;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .news-card:hover .read-more-btn,
+    .read-more-btn:hover {
+        text-decoration: underline;
+        color: #7ea6f5;
+    }
+
 </style>
 </head>
 <body>
@@ -692,26 +737,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const params = new URLSearchParams({
                 id: newsId,
-                header: item.title || '',
+                // header: item.title || '',
                 author: item.author || '',
                 category: item.category || '',
-                news: item.text || ''
+                // news: item.text || ''
             });
             card.href = item.url || `/form?${params.toString()}`;
 
             const isStaff = user.role === 'Admin' || user.role === 'Moderator';
 
-            card.innerHTML = `
-                ${isStaff ? `<button type="button" class="delete-btn" data-id="${newsId}" title="Удалить">×</button>` : ''}
-                <h3>${escapeHtml(item.title)}</h3>
-                <div class="news-meta">
-                    <span>📅 ${formatDate(item.date)}</span>
-                    ${item.author ? `<span>✍️ ${escapeHtml(item.author)}</span>` : ''}
-                    ${item.category ? `<span class="category-tag">${escapeHtml(item.category)}</span>` : ''}
-                </div>
-                <p class="news-text">${escapeHtml(item.text)}</p>
-            `;
-            newsList.appendChild(card);
+    const isLongText = item.text && item.text.length > 50;
+    // Если текст длиннее 50 символов, берем первые 50 и добавляем троеточие
+    const displayText = isLongText ? item.text.slice(0, 50) + '...' : (item.text || '');
+
+    card.innerHTML = `
+        ${isStaff ? `<button type="button" class="delete-btn" data-id="${newsId}" title="Удалить">×</button>` : ''}
+        <h3>${escapeHtml(item.title)}</h3>
+        <div class="news-meta">
+            <span>📅 ${formatDate(item.date)}</span>
+            ${item.author ? `<span>✍️ ${escapeHtml(item.author)}</span>` : ''}
+            ${item.category ? `<span class="category-tag">${escapeHtml(item.category)}</span>` : ''}
+        </div>
+        <div class="news-text-wrapper">
+            <p class="news-text ${isLongText ? 'truncated' : ''}">${escapeHtml(displayText)}</p>
+            ${isLongText ? `<span class="read-more-btn">Ещё</span>` : ''}
+        </div>
+    `;
+    newsList.appendChild(card);
         });
     }
 
