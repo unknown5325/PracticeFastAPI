@@ -40,7 +40,7 @@ async def dsiableCache(request:Request, call_next):
     response.headers["Expires"] = "0"
     return response
 
-@app.get('/', response_class=HTMLResponse)
+
 @app.get('/home', response_class=HTMLResponse)
 def home(request:Request):
     try:
@@ -64,7 +64,7 @@ def home(request:Request):
 def home(request:Request):
     return templates.TemplateResponse(request=request, name='404.html')
 
-
+@app.post('/')
 @app.post('/login')
 def postLogin(request:Request, email: str = Form(...), password: str = Form(...)):
     digits = func.getCollumn()
@@ -94,7 +94,7 @@ def postLogin(request:Request, email: str = Form(...), password: str = Form(...)
         error = 'Неправильный email или пароль'
         return templates.TemplateResponse(request=request, name='login.html', context={'error' : error})
 
-
+@app.get('/', response_class=HTMLResponse)
 @app.get('/login', response_class=HTMLResponse)
 def home(request:Request):
     return templates.TemplateResponse(request=request, name='login.html')

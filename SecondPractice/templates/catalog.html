@@ -34,141 +34,6 @@
         padding-top: 90px;
     }
 
-        /* === Действия (лайки/дизлайки/комменты) === */
-    .card-actions {
-        display: flex;
-        gap: 12px;
-        margin-top: 20px;
-        padding-top: 16px;
-        border-top: 1px solid var(--border-color);
-    }
-
-    .action-btn {
-        background: transparent;
-        border: 1px solid var(--border-color);
-        color: var(--text-muted);
-        padding: 6px 12px;
-        border-radius: 8px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.9rem;
-        transition: all 0.2s;
-        font-family: inherit;
-    }
-
-    .action-btn:hover {
-        border-color: var(--accent-color);
-        color: var(--text-main);
-        background: rgba(139, 92, 246, 0.1);
-    }
-
-    /* Активные состояния кнопок */
-    .action-btn.active-like {
-        border-color: #22c55e;
-        color: #22c55e;
-        background: rgba(34, 197, 94, 0.1);
-    }
-
-    .action-btn.active-dislike {
-        border-color: var(--danger-color);
-        color: var(--danger-color);
-        background: rgba(244, 63, 94, 0.1);
-    }
-
-    /* === Секция комментариев === */
-    .comments-section {
-        margin-top: 16px;
-        padding-top: 16px;
-        border-top: 1px solid var(--border-color);
-        animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-5px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .comments-list {
-        max-height: 200px;
-        overflow-y: auto;
-        margin-bottom: 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    /* Кастомный скроллбар для комментариев */
-    .comments-list::-webkit-scrollbar { width: 4px; }
-    .comments-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
-
-    .comment-item {
-        background: var(--bg-main);
-        padding: 10px 12px;
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
-    }
-
-    .comment-author {
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: var(--accent-hover);
-        margin-bottom: 4px;
-    }
-
-    .comment-text {
-        font-size: 0.9rem;
-        color: var(--text-main);
-        line-height: 1.4;
-    }
-
-    .comment-form {
-        display: flex;
-        gap: 8px;
-    }
-
-    .comment-input {
-        flex: 1;
-        background: var(--bg-main);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        padding: 8px 12px;
-        color: var(--text-main);
-        font-size: 0.9rem;
-        font-family: inherit;
-    }
-
-    .comment-input:focus {
-        outline: none;
-        border-color: var(--accent-color);
-        box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
-    }
-
-    .btn-send {
-        background: var(--accent-color);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        width: 36px;
-        cursor: pointer;
-        transition: background 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1rem;
-    }
-
-    .btn-send:hover {
-        background: var(--accent-hover);
-    }
-
-    .container {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 30px 20px 40px;
-    }
-
     /* ===== ШАПКА ===== */
     .top-bar {
         position: fixed;
@@ -214,6 +79,7 @@
         border: 2px solid var(--border-color);
         box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
         letter-spacing: 0.5px;
+        object-fit: cover;
     }
 
     .user-text {
@@ -292,7 +158,13 @@
         box-shadow: 0 4px 14px rgba(244, 63, 94, 0.35);
     }
 
-    /* ===== ЗАГОЛОВОК СТРАНИЦЫ ===== */
+    /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px 20px 40px;
+    }
+
     .page-header {
         text-align: center;
         margin-bottom: 32px;
@@ -372,9 +244,31 @@
         min-height: 90px;
     }
 
-    .form-row {
-        grid-template-columns: 1fr 1fr;
-        gap: 14px;
+    /* Стилизация поля загрузки файла */
+    .form-group input[type="file"] {
+        padding: 10px;
+        background: var(--bg-main);
+        border: 1px dashed var(--border-color);
+        border-radius: 10px;
+        color: var(--text-muted);
+        cursor: pointer;
+    }
+
+    .form-group input[type="file"]::file-selector-button {
+        background: var(--card-bg);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 6px 12px;
+        margin-right: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: inherit;
+    }
+
+    .form-group input[type="file"]::file-selector-button:hover {
+        border-color: var(--accent-color);
+        color: var(--accent-hover);
     }
 
     .btn-primary {
@@ -383,6 +277,13 @@
         width: 100%;
         padding: 12px 22px;
         margin-top: 6px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: inherit;
     }
 
     .btn-primary:hover {
@@ -427,11 +328,16 @@
         position: relative;
         animation: slideIn 0.3s ease;
         transition: border-color 0.2s, transform 0.2s;
+        display: block;
+        text-decoration: none;
+        color: inherit;
     }
 
     .news-card:hover {
         border-color: var(--accent-color);
         transform: translateY(-2px);
+        text-decoration: none;
+        color: inherit;
     }
 
     @keyframes slideIn {
@@ -470,11 +376,59 @@
         border: 1px solid rgba(139, 92, 246, 0.3);
     }
 
+    /* Стили для изображения в новости */
+    .news-image {
+        width: 100%;
+        max-height: 350px;
+        object-fit: cover;
+        border-radius: 12px;
+        margin-bottom: 14px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-main);
+    }
+
+    .news-text-wrapper {
+        position: relative;
+    }
+
     .news-text {
         color: var(--text-main);
         line-height: 1.6;
         white-space: pre-wrap;
         word-wrap: break-word;
+        word-break: break-word;
+        margin-bottom: 0;
+    }
+
+    .news-text.truncated {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .news-text.truncated::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 18px;
+        background: linear-gradient(to bottom, rgba(20, 14, 36, 0), var(--card-bg) 95%);
+        pointer-events: none;
+    }
+
+    .read-more-btn {
+        display: inline-block;
+        margin-top: 6px;
+        color: var(--accent-hover);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .news-card:hover .read-more-btn,
+    .read-more-btn:hover {
+        text-decoration: underline;
+        color: var(--accent-color);
     }
 
     .delete-btn {
@@ -493,6 +447,7 @@
         justify-content: center;
         font-size: 1.1rem;
         transition: all 0.2s;
+        z-index: 2;
     }
 
     .delete-btn:hover {
@@ -517,21 +472,6 @@
         opacity: 0.5;
     }
 
-    .news-card {
-    display: block;           /* Возвращаем поведение блочного элемента */
-    text-decoration: none;    /* Убираем стандартное подчеркивание ссылки */
-    color: inherit;           /* Наследуем цвет текста от родителя (убираем синий цвет) */
-    position: relative;       /* Нужно, если кнопка .delete-btn позиционируется абсолютно */
-    /* ... ваши остальные стили карточки (отступы, рамки, фон) ... */
-    }
-
-    /* Чтобы при наведении не появлялось подчеркивание, если оно задано глобально для ссылок */
-    .news-card:hover {
-        text-decoration: none;
-        color: inherit;
-    }
-
-
     /* ===== МОБИЛКА ===== */
     @media (max-width: 600px) {
         body { padding-top: 80px; }
@@ -542,55 +482,9 @@
         .user-role { font-size: 0.75rem; }
         .nav-buttons { gap: 6px; }
         .btn { padding: 8px 12px; font-size: 0.82rem; }
-        .form-row { grid-template-columns: 1fr; }
         .page-header h1 { font-size: 1.6rem; }
         .container { padding: 20px 12px 30px; }
     }
-
-
-    .news-text-wrapper {
-        position: relative;
-    }
-
-    .news-text {
-        word-break: break-word; /* Переносит длинные слова без пробелов */
-        margin-bottom: 0;
-    }
-
-    .news-text.truncated {
-        position: relative;
-        overflow: hidden;
-    }
-
-    /* Плавное затемнение нижней части текста */
-    .news-text.truncated::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 18px;
-        /* Подставьте точный цвет фона вашей карточки вместо #151b2b */
-        background: linear-gradient(to bottom, rgba(21, 27, 43, 0), #151b2b 95%);
-        pointer-events: none;
-    }
-
-    /* Кнопка «Ещё» */
-    .read-more-btn {
-        display: inline-block;
-        margin-top: 6px;
-        color: #5b8def;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-    }
-
-    .news-card:hover .read-more-btn,
-    .read-more-btn:hover {
-        text-decoration: underline;
-        color: #7ea6f5;
-    }
-
 </style>
 </head>
 <body>
@@ -599,10 +493,10 @@
 <header class="top-bar">
     <div class="top-bar-inner">
         <div class="user-info">
-            <img class="avatar" id="avatar" src="/static/avatars/{{ logo }}" alt="">
+            <img class="avatar" id="avatar" src="/static/avatars/{{ logo }}" alt="Аватар" onerror="this.style.display='none'">
             <div class="user-text">
-                <div class="user-name" name="name" id="userName">{{ name }}</div>
-                <div class="user-role" name="role" id="userRole">{{ role }}</div>
+                <div class="user-name" id="userName">{{ name }}</div>
+                <div class="user-role" id="userRole">{{ role }}</div>
             </div>
         </div>
         <nav class="nav-buttons">
@@ -623,15 +517,18 @@
 
     <section class="form-card">
         <h2>Добавить новость</h2>
-        <form id="newsForm" action="/catalog" method="POST">
-                <div class="form-group">
-                    <label for="title">Заголовок *</label>
-                    <input type="text" id="title" name="header" maxlength="100" required placeholder="Например: Открытие нового парка">
-                    <input type="hidden" id="newsIdInput" name="id">
-                </div>
+        <form id="newsForm">
+            <div class="form-group">
+                <label for="title">Заголовок *</label>
+                <input type="text" id="title" name="header" maxlength="100" required placeholder="Например: Открытие нового парка">
+            </div>
             <div class="form-group">
                 <label for="category">Категория</label>
                 <input type="text" id="category" name="category" maxlength="30" placeholder="Технологии, Спорт, Наука...">
+            </div>
+            <div class="form-group">
+                <label for="imageInput">Изображение</label>
+                <input type="file" id="imageInput" name="image" accept="image/*">
             </div>
             <div class="form-group">
                 <label for="text">Текст новости *</label>
@@ -649,7 +546,6 @@
 </div>
 
 <script>
-
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Данные пользователя
     const userNameEl = document.getElementById('userName');
@@ -661,7 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
         role: userRoleEl ? userRoleEl.textContent.trim() : 'User'
     };
 
-    if (avatarEl && userNameEl) {
+    if (avatarEl && userNameEl && !avatarEl.src.includes('/static/avatars/')) {
         const parts = user.name.split(/\s+/);
         const first = parts[0] ? parts[0][0] : '';
         const second = parts[1] ? parts[1][0] : '';
@@ -737,33 +633,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const params = new URLSearchParams({
                 id: newsId,
-                // header: item.title || '',
                 author: item.author || '',
-                category: item.category || '',
-                // news: item.text || ''
+                category: item.category || ''
             });
             card.href = item.url || `/form?${params.toString()}`;
 
             const isStaff = user.role === 'Admin' || user.role === 'Moderator';
+            const isLongText = item.text && item.text.length > 50;
+            const displayText = isLongText ? item.text.slice(0, 50) + '...' : (item.text || '');
+            
+            // Добавляем изображение, если оно есть
+            const imageHtml = item.image ? `<img src="${item.image}" alt="Изображение новости" class="news-image">` : '';
 
-    const isLongText = item.text && item.text.length > 50;
-    // Если текст длиннее 50 символов, берем первые 50 и добавляем троеточие
-    const displayText = isLongText ? item.text.slice(0, 50) + '...' : (item.text || '');
-
-    card.innerHTML = `
-        ${isStaff ? `<button type="button" class="delete-btn" data-id="${newsId}" title="Удалить">×</button>` : ''}
-        <h3>${escapeHtml(item.title)}</h3>
-        <div class="news-meta">
-            <span>📅 ${formatDate(item.date)}</span>
-            ${item.author ? `<span>✍️ ${escapeHtml(item.author)}</span>` : ''}
-            ${item.category ? `<span class="category-tag">${escapeHtml(item.category)}</span>` : ''}
-        </div>
-        <div class="news-text-wrapper">
-            <p class="news-text ${isLongText ? 'truncated' : ''}">${escapeHtml(displayText)}</p>
-            ${isLongText ? `<span class="read-more-btn">Ещё</span>` : ''}
-        </div>
-    `;
-    newsList.appendChild(card);
+            card.innerHTML = `
+                ${isStaff ? `<button type="button" class="delete-btn" data-id="${newsId}" title="Удалить">×</button>` : ''}
+                ${imageHtml}
+                <h3>${escapeHtml(item.title)}</h3>
+                <div class="news-meta">
+                    <span>📅 ${formatDate(item.date)}</span>
+                    ${item.author ? `<span>✍️ ${escapeHtml(item.author)}</span>` : ''}
+                    ${item.category ? `<span class="category-tag">${escapeHtml(item.category)}</span>` : ''}
+                </div>
+                <div class="news-text-wrapper">
+                    <p class="news-text ${isLongText ? 'truncated' : ''}">${escapeHtml(displayText)}</p>
+                    ${isLongText ? `<span class="read-more-btn">Ещё</span>` : ''}
+                </div>
+            `;
+            
+            newsList.appendChild(card);
         });
     }
 
@@ -776,7 +673,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (homeBtn) {
-        homeBtn.addEventListener('click', () => {
+        homeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
@@ -792,33 +690,58 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 5. Сохранение при отправке формы
+    // 5. Сохранение при отправке формы (с поддержкой изображений)
     if (form) {
-        form.addEventListener('submit', () => {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault(); // Предотвращаем стандартную отправку для асинхронной обработки файла
+
             const newId = generateId();
-            document.getElementById('newsIdInput').value = newId;
             const titleInput = document.getElementById('title');
-            const authorInput = document.getElementById('author');
             const categoryInput = document.getElementById('category');
             const textInput = document.getElementById('text');
+            const imageInput = document.getElementById('imageInput');
 
-            const news = loadNews();
-            news.push({
-                id: newId,
-                title: titleInput ? titleInput.value.trim() : '',
-                author: (authorInput && authorInput.value.trim()) ? authorInput.value.trim() : user.name,
-                category: categoryInput ? categoryInput.value.trim() : '',
-                text: textInput ? textInput.value.trim() : '',
-                date: Date.now()
-            });
-            saveNews(news);
+            const saveNewsItem = (imageDataUrl) => {
+                const news = loadNews();
+                news.push({
+                    id: newId,
+                    title: titleInput ? titleInput.value.trim() : '',
+                    author: user.name,
+                    category: categoryInput ? categoryInput.value.trim() : '',
+                    text: textInput ? textInput.value.trim() : '',
+                    image: imageDataUrl || null,
+                    date: Date.now()
+                });
+                saveNews(news);
+                form.reset(); // Очищаем форму после успешного добавления
+                renderNews(); // Обновляем ленту
+            };
+
+            if (imageInput && imageInput.files && imageInput.files[0]) {
+                const file = imageInput.files[0];
+                
+                // Ограничение размера до 1 МБ для экономии места в localStorage
+                if (file.size > 1024 * 1024) {
+                    alert('Изображение слишком большое. Максимальный размер: 1 МБ.');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    saveNewsItem(event.target.result);
+                };
+                reader.onerror = () => {
+                    alert('Ошибка при чтении файла.');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                saveNewsItem(null);
+            }
         });
     }
 
     renderNews();
 });
-
-
 </script>
 </body>
 </html>
