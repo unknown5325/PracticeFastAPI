@@ -13,6 +13,7 @@ import pandas as pd
 import random
 import os
 import random
+import csv
 
 
 ACTIVETIME = timedelta(hours=30)
@@ -31,6 +32,8 @@ active_sessions = dict(zip(ses, tm))
 UPLOAD_DIR = Path("static/avatars")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
+UPLOAD_DIR2 = Path("static/newsImages")
+UPLOAD_DIR2.mkdir(parents=True, exist_ok=True)
 
 @app.middleware('http')
 async def dsiableCache(request:Request, call_next):
@@ -136,15 +139,35 @@ def home(request:Request):
     return templates.TemplateResponse(request=request, name='register.html')
 
 @app.post('/catalog')
-def getCatalog(request:Request, 
+async def getCatalog(request:Request, 
             header: str = Form(default=''), 
             news: str = Form(default=''),
-            id: str = Form(default='')):
+            id: str = Form(default=''),
+            imgNews: list[UploadFile] = File(default=[])):
+
+    listImages = []
+    for item in imgNews:
+        if not item.filename:
+            continue
+
+        file_ext = Path(item.filename).suffix
+        unique_filename = f"{uuid.uuid4()}{file_ext}"
+        file_path = UPLOAD_DIR2 / unique_filename
+
+        content = await item.read()
+        with open(file_path, "wb") as f:
+            f.write(content)
+
+        listImages.append(unique_filename)
+
     name = request.cookies.get('name')
     logo = request.cookies.get('logo')
     response = RedirectResponse(url='/catalog', status_code=303)
+    print(id)
     df = pd.DataFrame({'avatar' : logo, 'name' : name, 'header' : header, 'news' : news, 'id' : id}, index=[0])
     df.to_csv('NewsList.csv', index=False,  mode="a", sep=",", header=not os.path.isfile("NewsList.csv"))
+    dfImg = pd.DataFrame([[id] + listImages])
+    dfImg.to_csv('NewsListImages.csv', index=False,  mode="a", sep=",", header=not os.path.isfile("NewsListImages.csv"))
     return response
     
 @app.get('/catalog', response_class=HTMLResponse)
@@ -183,7 +206,15 @@ def form(request:Request, name: str = Cookie(default='User'), id : str = '', dty
             headerNews = user_row['header']
             news = user_row['news']
 
+            with open('NewsListImages.csv', 'r', encoding='utf-8') as filee:
+                reader = csv.reader(filee)
+                next(reader)
+                for row in reader:
+                    if row and row[0].strip() == str(id).strip():
+                        listImages = row[1:]
+                        break
 
+            
             dt_time = datetime.fromisoformat(time)
             if session_id in active_sessions.keys() and datetime.now() - dt_time < ACTIVETIME: # Добавление времени сессии
                 return templates.TemplateResponse(request=request, name='form.html', context={'name' : name, 
@@ -193,7 +224,8 @@ def form(request:Request, name: str = Cookie(default='User'), id : str = '', dty
                                                                                               'nameNews' : nameNews, 
                                                                                               'avatarNews' : avatarNews,
                                                                                               'news' : news,
-                                                                                              'id' : id})
+                                                                                              'id' : id,
+                                                                                              'images' : listImages})
             else:
                 print('bad')
                 del active_sessions[session_id]
