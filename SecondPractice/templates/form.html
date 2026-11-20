@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ header }} | Новостная лента</title>
 <style>
-    /* === ИСХОДНАЯ СТИЛИСТИКА === */
+    /* === ИСХОДНАЯ СТИЛИСТИКА (без изменений) === */
     :root {
         --bg-main: #0b0718;
         --card-bg: #140e24;
@@ -216,7 +216,7 @@
         width: 100%;
         height: 100%;
         max-height: 500px;
-        object-fit: cover; /* Можно заменить на 'contain', если важно показывать фото целиком без обрезки */
+        object-fit: cover;
         display: block;
         user-select: none;
         -webkit-user-drag: none;
@@ -459,7 +459,7 @@
         </div>
         <nav class="nav-buttons">
             <a href="/catalog" class="btn btn-ghost">← Лента</a>
-            <a href="/" class="btn btn-ghost">Главная</a>
+            <a href="/home" class="btn btn-ghost">Главная</a>
         </nav>
     </div>
 </header>
@@ -469,6 +469,8 @@
     <a href="/catalog" class="back-link">← Вернуться к ленте</a>
 
     <article class="expanded-post">
+        <!-- ИЗМЕНЕНИЕ 1: Добавлено скрытое поле для уникального ID пользователя -->
+        <input type="hidden" id="currentUserId" value="{{ user_id | default(name) }}">
         <input type="hidden" id="hiddenPostId" value="{{ id }}">
 
         <!-- Шапка поста -->
@@ -481,7 +483,7 @@
             </div>
         </div>
 
-        <!-- КАРУСЕЛЬ ИЗОБРАЖЕНИЙ (Рендерится только если images передан и не пуст) -->
+        <!-- КАРУСЕЛЬ ИЗОБРАЖЕНИЙ -->
         {% set img_list = images if images is iterable and images is not string else [images] %}
         {% if img_list and img_list | length > 0 %}
         <div class="post-carousel" id="postCarousel">
@@ -547,14 +549,13 @@
 </main>
 
 <script>
-    // === 1. ЛОГИКА КАРУСЕЛИ ===
+    // === 1. ЛОГИКА КАРУСЕЛИ (без изменений) ===
     let currentSlide = 0;
     const track = document.getElementById('carouselTrack');
     const slides = document.querySelectorAll('.carousel-slide');
     const dots = document.querySelectorAll('.carousel-dot');
     const totalSlides = slides.length;
 
-    // Поддержка свайпов для мобильных устройств
     let touchStartX = 0;
     let touchEndX = 0;
 
@@ -573,9 +574,9 @@
         if (totalSlides <= 1) return;
         const swipeThreshold = 50;
         if (touchStartX - touchEndX > swipeThreshold) {
-            moveCarousel(1); // Свайп влево -> следующее
+            moveCarousel(1);
         } else if (touchEndX - touchStartX > swipeThreshold) {
-            moveCarousel(-1); // Свайп вправо -> предыдущее
+            moveCarousel(-1);
         }
     }
 
@@ -600,50 +601,81 @@
         }
     }
 
-    // === 2. ГЕНЕРАЦИЯ УНИКАЛЬНОГО КЛЮЧА ДЛЯ LOCALSTORAGE ===
-    const hiddenInput = document.getElementById('hiddenPostId');
-    let postIdBase;
-    
-    if (hiddenInput && hiddenInput.value && hiddenInput.value.trim() !== '' && hiddenInput.value !== '{{ id }}') {
-        postIdBase = hiddenInput.value.trim();
-    } else {
-        const title = document.querySelector('.post-title')?.textContent.trim() || 'no_title';
-        const author = document.querySelector('.post-author-name')?.textContent.trim() || 'no_author';
-        postIdBase = title + '_' + author;
-    }
+    // === 2. ИДЕНТИФИКАЦИЯ ПОЛЬЗОВАТЕЛЯ И КЛЮЧ LOCALSTORAGE ===
+    const hiddenInputPostId = document.getElementById('hiddenPostId');
+    const postIdBase = (hiddenInputPostId && hiddenInputPostId.value && hiddenInputPostId.value.trim() !== '' && hiddenInputPostId.value !== '{{ id }}') 
+        ? hiddenInputPostId.value.trim() 
+        : (document.querySelector('.post-title')?.textContent.trim() || 'no_title') + '_' + (document.querySelector('.post-author-name')?.textContent.trim() || 'no_author');
     
     const POST_ID = 'post_data_' + postIdBase.replace(/[^a-zA-Z0-9а-яА-ЯёЁ_-]/g, '_');
 
-    // === 3. СОСТОЯНИЕ ПОСТА ===
+    // Уникальный ID пользователя (берётся из бэкенда, либо fallback на имя)
+    const currentUserId = document.getElementById('currentUserId')?.value?.trim() || document.getElementById('userName')?.textContent.trim() || 'guest_' + Math.random().toString(36).substr(2, 9);
+    const CURRENT_USER = document.getElementById('userName')?.textContent.trim() || 'Гость'; 
+
+    // === 3. СОСТОЯНИЕ ПОСТА (ИЗМЕНЕНО) ===
     const defaultState = {
-        likes: 0,
-        dislikes: 0,
-        userReaction: null,
+        reactions: {}, // Теперь хранит словарь: { "userId": "like" | "dislike" }
         comments: []
     };
 
     function loadState() {
         const saved = localStorage.getItem(POST_ID);
-        return saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultState));
+        if (!saved) return JSON.parse(JSON.stringify(defaultState));
+        
+        let parsed = JSON.parse(saved);
+        
+        // ИЗМЕНЕНИЕ 2: Миграция со старой структуры на новую (чтобы не потерять старые данные)
+        if (parsed.userReaction !== undefined) {
+            const newReactions = {};
+            if (parsed.userReaction === 'like' || parsed.userReaction === 'dislike') {
+                newReactions[currentUserId] = parsed.userReaction;
+            }
+            const migratedComments = (parsed.comments || []).map(c => ({
+                ...c,
+                userId: c.userId || currentUserId // Добавляем userId старым комментариям
+            }));
+            
+            return {
+                reactions: newReactions,
+                comments: migratedComments
+            };
+        }
+        
+        return parsed;
     }
 
     let state = loadState();
-    const CURRENT_USER = document.getElementById('userName')?.textContent.trim() || 'Гость'; 
 
     function saveState() {
         localStorage.setItem(POST_ID, JSON.stringify(state));
     }
 
+    // ИЗМЕНЕНИЕ 3: Динамический подсчёт лайков/дизлайков по уникальным пользователям
+    function getReactionCounts() {
+        let likes = 0;
+        let dislikes = 0;
+        for (const uid in state.reactions) {
+            if (state.reactions[uid] === 'like') likes++;
+            else if (state.reactions[uid] === 'dislike') dislikes++;
+        }
+        return { likes, dislikes };
+    }
+
     function applyStateToDOM() {
-        document.getElementById('likeCount').textContent = state.likes;
-        document.getElementById('dislikeCount').textContent = state.dislikes;
+        const counts = getReactionCounts();
+        document.getElementById('likeCount').textContent = counts.likes;
+        document.getElementById('dislikeCount').textContent = counts.dislikes;
         document.getElementById('commentsCount').textContent = state.comments.length;
 
         const likeBtn = document.getElementById('likeBtn');
         const dislikeBtn = document.getElementById('dislikeBtn');
 
-        likeBtn.classList.toggle('active-like', state.userReaction === 'like');
-        dislikeBtn.classList.toggle('active-dislike', state.userReaction === 'dislike');
+        // Проверяем реакцию именно текущего пользователя по его ID
+        const currentUserReaction = state.reactions[currentUserId] || null;
+
+        likeBtn.classList.toggle('active-like', currentUserReaction === 'like');
+        dislikeBtn.classList.toggle('active-dislike', currentUserReaction === 'dislike');
 
         renderComments();
     }
@@ -666,7 +698,8 @@
             const authorDiv = document.createElement('div');
             authorDiv.className = 'comment-author';
 
-            const isAuthor = c.author === CURRENT_USER;
+            // ИЗМЕНЕНИЕ 4: Проверка авторства по уникальному userId, а не по имени
+            const isAuthor = c.userId === currentUserId;
             const isAdminOrMod = userRole === 'Admin' || userRole === 'Moderator';
             
             if (isAuthor || isAdminOrMod) {
@@ -694,26 +727,20 @@
 
     // === 5. ОБРАБОТЧИКИ ДЕЙСТВИЙ ===
     function toggleLike() {
-        if (state.userReaction === 'like') {
-            state.likes--;
-            state.userReaction = null;
+        if (state.reactions[currentUserId] === 'like') {
+            delete state.reactions[currentUserId]; // Убираем реакцию
         } else {
-            if (state.userReaction === 'dislike') state.dislikes--;
-            state.likes++;
-            state.userReaction = 'like';
+            state.reactions[currentUserId] = 'like'; // Ставим лайк (автоматически перезаписывает дизлайк, если он был)
         }
         saveState();
         applyStateToDOM();
     }
 
     function toggleDislike() {
-        if (state.userReaction === 'dislike') {
-            state.dislikes--;
-            state.userReaction = null;
+        if (state.reactions[currentUserId] === 'dislike') {
+            delete state.reactions[currentUserId]; // Убираем реакцию
         } else {
-            if (state.userReaction === 'like') state.likes--;
-            state.dislikes++;
-            state.userReaction = 'dislike';
+            state.reactions[currentUserId] = 'dislike'; // Ставим дизлайк (автоматически перезаписывает лайк, если он был)
         }
         saveState();
         applyStateToDOM();
@@ -732,7 +759,9 @@
         const now = new Date();
         const currentTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+        // ИЗМЕНЕНИЕ 5: Сохраняем userId вместе с комментарием для точной идентификации автора
         state.comments.push({
+            userId: currentUserId,
             author: CURRENT_USER,
             time: currentTime,
             text: text
